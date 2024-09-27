@@ -1,0 +1,64 @@
+.home-container {
+  height: 100vh;
+  width: 100vw;
+  background-image: url("../../assets/images/rent-a-unicorn.jpg");
+  background-size: cover; /* Ensures the image covers the entire container */
+  background-position: center; /* Centers the image within the container */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding-right: 8rem;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 200px;
+  height: auto;
+  z-index: 10;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #4caf50;
+}
+
+p {
+  font-size: 1.2em;
+  color: whitesmoke;
+}
+
+.button-container {
+  margin-top: 30px;
+}
+
+.login-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background-color: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.2em;
+  margin-bottom: 15px;
+}
+
+.login-button:hover {
+  background-color: #45a049;
+}
+
+.signup-link {
+  color: #4caf50;
+  text-decoration: underline;
+}
+
+.signup-link:hover {
+  color: #45a049;
+}
