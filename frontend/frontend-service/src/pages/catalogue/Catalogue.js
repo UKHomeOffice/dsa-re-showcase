@@ -1,18 +1,19 @@
 import React from "react";
 import "./Catalogue.css";
+import unicorn1 from "../../assets/images/unicorn-catalogue.png";
 
 const Catalogue = () => {
   const products = [
     {
       id: 1,
       name: "Unicorn 1",
-      image: "url_to_image1",
+      image: unicorn1,
       description: "A reliable unicorn.",
     },
     {
       id: 2,
       name: "Unicorn 2",
-      image: "url_to_image2",
+      image: unicorn1,
       description: "An efficient unicorn.",
     },
   ];
