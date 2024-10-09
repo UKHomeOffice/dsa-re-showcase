@@ -1,13 +1,10 @@
 kind: pipeline
+type: kubernetes
 name: build-test
 
 platform:
   os: linux
   arch: amd64
-
-services:
-  - name: docker
-    image: maven:3.8.7-openjdk-18-slim
 
 steps:
 - name: build
