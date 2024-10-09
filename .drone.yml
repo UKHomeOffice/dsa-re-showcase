@@ -2,10 +2,11 @@ kind: pipeline
 name: build-test
 
 steps:
-  - name: build
-    image: maven:3.8.7-openjdk-18-slim
-    commands:
-      - ./mvnw clean package
-    when:
-      event:
-        - manual
+- name: build
+  image: maven:3.8.7-openjdk-18-slim
+  commands:
+  - ./mvnw clean package
+  when:
+    event:
+    - push
+
