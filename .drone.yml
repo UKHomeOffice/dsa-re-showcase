@@ -1,10 +1,15 @@
 kind: pipeline
 name: build-test
 
+services:
+  - name: docker
+    image: maven:3.8.7-openjdk-18-slim
+
 steps:
 - name: build
   image: maven:3.8.7-openjdk-18-slim
   commands:
+  - cd backend/registration-service
   - ./mvnw clean package
   when:
     event:
