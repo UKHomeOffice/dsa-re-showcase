@@ -1,0 +1,13 @@
+{{- $fullName := include "registration-service-chart.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "registration-service-chart.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  egress:
+  - {}
+  policyTypes:
+  - Egress
