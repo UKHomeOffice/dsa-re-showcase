@@ -1,18 +1,23 @@
 kind: pipeline
+type: docker
 name: build-test
-type: kubernetes
 
 platform:
   os: linux
   arch: amd64
 
 steps:
+# Build the image from the docker file
 - name: build
-  image: maven:3.8.7-openjdk-18-slim
+  image: docker
   commands:
-  - cd backend/registration-service
-  - ./mvnw clean package
-  when:
-    event:
-    - push
+  - docker build -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
+
+# Push the docker image to quay.io repo
+- name: publish
+  image: plugins/docker
+  settings:
+    registry: quay.io
+    repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
+
 
