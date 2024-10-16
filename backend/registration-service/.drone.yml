@@ -31,7 +31,7 @@ steps:
       username:
         from_secret: QUAY_USERNAME
       password:
-        from_secret:QUAY_PASSWORD
+        from_secret: QUAY_PASSWORD
 
 trigger:
   event:
