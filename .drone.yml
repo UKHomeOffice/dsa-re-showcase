@@ -5,9 +5,6 @@ name: build-test
 platform:
   os: linux
   arch: amd64
-  
-workspace:
-  path: ./backend/registration-service
 
 # steps:
 # # Build the image from the docker file
@@ -26,6 +23,7 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      dockerfile: ./backend/registration-service/Dockerfile
       repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
       tags:
       - latest
