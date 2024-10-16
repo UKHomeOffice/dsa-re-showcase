@@ -7,7 +7,7 @@ platform:
   arch: amd64
   
 workspace:
-  path: /backend/registration-service
+  path: ./backend/registration-service
 
 # steps:
 # # Build the image from the docker file
