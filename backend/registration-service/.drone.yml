@@ -26,7 +26,7 @@ steps:
       dockerfile: backend/registration-service/Dockerfile
       registry: quay.io
       context: backend/registration-service
-      repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
+      repo: ukhomeofficedigital/dsa-re-registration-service
       tags:
       - latest
       username:
