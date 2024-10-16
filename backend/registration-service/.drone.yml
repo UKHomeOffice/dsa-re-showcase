@@ -30,9 +30,9 @@ steps:
       tags:
       - latest
       username:
-        from_secret: QUAY_USERNAME
+        from_secret: CH_QUAY_USER
       password:
-        from_secret: QUAY_PASSWORD
+        from_secret: CH_QUAY_PASS
 
 trigger:
   event:
