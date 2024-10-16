@@ -9,18 +9,26 @@ platform:
 workspace:
   path: /backend/registration-service
 
-steps:
-# Build the image from the docker file
-- name: build
-  image: docker
-  commands:
-  - docker build -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
+# steps:
+# # Build the image from the docker file
+# - name: build
+#   image: docker
+#   commands:
+#   - docker build -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
 
-# Push the docker image to quay.io repo
-- name: publish
-  image: docker
-  commands:
-  - docker push quay.io/ukhomeofficedigital/dsa-re-registration-service:latest
+# # Push the docker image to quay.io repo
+# - name: publish
+#   image: docker
+#   commands:
+#   - docker push quay.io/ukhomeofficedigital/dsa-re-registration-service:latest
+
+steps:
+  - name: docker
+    image: plugins/docker
+    settings:
+      repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
+      tags:
+      - latest
 
 trigger:
   event:
