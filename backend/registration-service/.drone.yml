@@ -15,6 +15,9 @@ steps:
       - kubectl version
       - helm list
     environment:
+      KUBE_NAMESPACE: dsa-re-dev
+      KUBE_SERVER:
+        from_secret: KUBE_SERVER_NOT_PROD
       KUBE_TOKEN:
         from_secret: KUBE_TOKEN_DEV
 
