@@ -13,7 +13,7 @@ steps:
     commands:
       - helm version
       - kubectl version
-      - helm list --kube-apiserver $${KUBE_SERVER} --namespace $${KUBE_NAMESPACE} --kube-token $${KUBE_TOKEN_DEV}
+      - helm list --kube-apiserver=$${KUBE_SERVER} --namespace=$KUBE_NAMESPACE --kube-token=$${KUBE_TOKEN_DEV}
     environment:
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
