@@ -13,6 +13,10 @@ steps:
     commands:
       - helm version
       - kubectl version
+      - helm list
+    environment:
+      KUBE_TOKEN:
+        from_secret: KUBE_TOKEN_DEV
 
   - name: helm-test
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
