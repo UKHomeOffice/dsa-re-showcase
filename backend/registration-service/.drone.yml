@@ -16,7 +16,7 @@ steps:
       - kubectl config set-context buildstep --cluster=buildstep --user=$SHOWCASE_KUBE_USER --namespace=$SHOWCASE_KUBE_NAMESPACE
       - kubectl config use-context buildstep
       - helm version
-      - kubectl version
+      - kubectl --context=buildset version
       - helm list --kube-context=buildstep
       - helm list --namespace=$SHOWCASE_KUBE_NAMESPACE --kube-apiserver=$SHOWCASE_KUBE_SERVER --kube-token=$SHOWCASE_KUBE_TOKEN
     environment:
