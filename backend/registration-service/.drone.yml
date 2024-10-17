@@ -19,6 +19,8 @@ steps:
         from_secret: KUBE_SERVER_NOT_PROD
       KUBE_TOKEN:
         from_secret: KUBE_TOKEN_DEV
+      FAKE_SECRET:
+        from_secret: FAKE_SECRET
 
   - name: helm-test
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
