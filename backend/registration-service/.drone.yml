@@ -12,7 +12,7 @@ steps:
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
       - kubectl config set-cluster buildstep --server=$SHOWCASE_KUBE_SERVER
-      - kubectl config set-credentials $KUBE_USER --token=$SHOWCASE_KUBE_TOKEN
+      - kubectl config set-credentials $SHOWCASE_KUBE_USER --token=$SHOWCASE_KUBE_TOKEN
       - kubectl config set-context buildstep --cluster=buildstep --user=$SHOWCASE_KUBE_USER --namespace=$SHOWCASE_KUBE_NAMESPACE
       - kubectl config use-context buildstep
       - helm version
