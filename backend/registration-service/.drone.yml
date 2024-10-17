@@ -7,10 +7,24 @@ platform:
   arch: amd64
 
 steps:
-  - name: helm
+
+  - name: debug-versions
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
       - helm version
+      - kubectl version
+
+  - name: helm-test
+    image: quay.io/ukhomeofficedigital/helm:v3.5.4
+    commands:
+      - helm version
+      - kubectl version
+
+  - name: helm-install
+    image: quay.io/ukhomeofficedigital/helm:v3.5.4
+    commands:
+      - helm version
+      - kubectl version
 
 trigger:
   event:
