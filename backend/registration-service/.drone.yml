@@ -13,7 +13,7 @@ steps:
     commands:
       - helm version
       - kubectl version
-      - helm list --kube-apiserver ${FAKE_SECRET}
+      - helm list --kube-apiserver=${FAKE_SECRET}
     environment:
       KUBE_SERVER:
         from_secret: KUBE_SERVER_NOT_PROD
