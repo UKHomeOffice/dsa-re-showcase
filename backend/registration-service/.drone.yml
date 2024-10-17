@@ -11,10 +11,16 @@ steps:
   - name: debug-versions
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
+      - kubectl config set-cluster buildstep --server=$KUBE_SERVER
+      - kubectl config set-credentials $KUBE_USER --token=$KUBE_TOKEN
+      - kubectl config set-context buildstep --cluster=buildstep --user=$KUBE_USER --namespace=$KUBE_NAMESPACE
+      - kubectl config use-context buildstep
       - helm version
       - kubectl version
-      - helm list --kube-apiserver=$KUBE_SERVER --namespace=$KUBE_NAMESPACE --kube-token=$KUBE_TOKEN_DEV
+      - helm list
     environment:
+      KUBE_USER:
+        from_secret: KUBE_NAMESPACE_DEV
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
       KUBE_SERVER:
