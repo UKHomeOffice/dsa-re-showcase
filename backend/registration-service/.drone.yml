@@ -9,7 +9,7 @@ platform:
 steps:
 
   - name: debug-versions
-    image: quay.io/ukhomeofficedigital/helm:v3.5.4
+    image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
     commands:
       - kubectl config set-cluster buildstep --server=$SHOWCASE_KUBE_SERVER
       - kubectl config set-credentials $SHOWCASE_KUBE_USER --token=$SHOWCASE_KUBE_TOKEN
