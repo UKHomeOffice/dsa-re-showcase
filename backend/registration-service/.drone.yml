@@ -17,7 +17,8 @@ steps:
       - kubectl config use-context buildstep
       - helm version
       - kubectl version
-      - kubectl get pods
+      - helm list --kube-context=buildstep
+      - helm list --namespace=$SHOWCASE_KUBE_NAMESPACE --kube-apiserver=$SHOWCASE_KUBE_SERVER --kube-token=$SHOWCASE_KUBE_TOKEN
     environment:
       SHOWCASE_KUBE_USER:
         from_secret: KUBE_NAMESPACE_DEV
