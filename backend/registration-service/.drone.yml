@@ -8,6 +8,7 @@ platform:
 
 steps:
   - name: helm
+    image: alpine/helm3
     commands:
       - helm version
 
