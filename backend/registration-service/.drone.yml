@@ -1,0 +1,16 @@
+kind: pipeline
+type: kubernetes
+name: build-test
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: helm
+    commands:
+      - helm version
+
+trigger:
+  event:
+  - push
