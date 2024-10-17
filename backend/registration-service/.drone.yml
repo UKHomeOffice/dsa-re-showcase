@@ -13,8 +13,10 @@ steps:
     commands:
       - helm version
       - kubectl version
-      - helm list --kube-apiserver=${FAKE_SECRET}
+      - helm list --kube-apiserver=$${FAKE_SECRET} --namespace=$${KUBE_NAMESPACE}
     environment:
+      KUBE_NAMESPACE:
+        from_secret: KUBE_NAMESPACE_DEV
       KUBE_SERVER:
         from_secret: KUBE_SERVER_NOT_PROD
       KUBE_TOKEN:
