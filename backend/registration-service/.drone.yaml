@@ -10,3 +10,7 @@ steps:
   - name: helm
     commands:
       - helm version
+
+trigger:
+  event:
+  - push
