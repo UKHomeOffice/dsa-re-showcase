@@ -13,9 +13,8 @@ steps:
     commands:
       - helm version
       - kubectl version
-      - helm list
+      - helm list --kube-apiserver ${FAKE_SECRET}
     environment:
-      KUBE_NAMESPACE: dsa-re-dev
       KUBE_SERVER:
         from_secret: KUBE_SERVER_NOT_PROD
       KUBE_TOKEN:
