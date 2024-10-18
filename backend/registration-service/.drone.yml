@@ -14,7 +14,8 @@ steps:
       dockerfile: backend/registration-service/Dockerfile
       registry: quay.io
       context: backend/registration-service
-      auto_tag: true
+      tags:
+      - latest
       repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
       username:
         from_secret: ROBOT_QUAY_USER
