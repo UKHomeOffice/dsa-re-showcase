@@ -1,0 +1,10 @@
+kubeVersion: 1.20.15
+
+image:
+  registry: quay.io
+  repository: "ukhomeofficedigital/dsa-re-postgresql"
+  
+primary:
+  persistence:
+    enabled: false
+    storageClass: "gp2-encrypted"
