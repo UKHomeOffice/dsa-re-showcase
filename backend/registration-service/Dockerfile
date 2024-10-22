@@ -1,7 +1,7 @@
 # Stage 1 - Build Application
 
 # Base image with JDK
-FROM maven:3.8.7-openjdk-18-slim as builder
+FROM quay.io/ukhomeofficedigital/dsa-re-amazoncorretto:21.0.5-alpine3.20 AS builder
 
 #Set working directory
 WORKDIR /app
@@ -22,7 +22,7 @@ COPY src ./src
 RUN ./mvnw clean install -Dskiptests
 
 # Stage 2 - Run application
-FROM maven:3.8.7-openjdk-18-slim
+FROM quay.io/ukhomeofficedigital/dsa-re-amazoncorretto:21.0.5-alpine3.20
 
 #Set working directory
 WORKDIR /app

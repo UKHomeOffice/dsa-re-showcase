@@ -30,9 +30,9 @@ steps:
       tags:
       - latest
       username:
-        from_secret: MM_QUAY_USER
+        from_secret: ROBOT_QUAY_USER
       password:
-        from_secret: MM_QUAY_PASS
+        from_secret: ROBOT_QUAY_PASS
 
 trigger:
   event:
