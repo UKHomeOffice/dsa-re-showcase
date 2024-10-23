@@ -11,7 +11,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
-            <column name="email" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)">
                 <constraints unique="true"/>
             </column>
             <column name="dob" type="DATE"/>
