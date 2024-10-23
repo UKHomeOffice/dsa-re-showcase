@@ -1,0 +1,1 @@
+FROM quay.io/ukhomeofficedigital/dsa-alpine:2c2464684dc19c2a28fbc9c96934cd36c22005b6
