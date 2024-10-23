@@ -1,3 +1,8 @@
-
 namespaceToAllowEgress:
   - dynatrace
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
