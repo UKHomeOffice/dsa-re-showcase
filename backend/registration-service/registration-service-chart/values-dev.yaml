@@ -11,6 +11,10 @@ serviceAccount:
   annotations: {}
   name: "dynatrace-oneagent-metadata-viewer"
 
+service:
+  type: ClusterIP
+  port: 80
+
 imagePullSecrets: []
 
 dynatrace:
