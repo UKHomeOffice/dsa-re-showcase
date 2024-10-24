@@ -30,10 +30,34 @@ spec:
         fsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+      initContainers:
+        - name: install-oneagent
+          image: {{ (((.Values).dynatrace).podRuntimeInjection).image | default "quay.io/ukhomeofficedigital/alpine:v3.15" | quote }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - ARCHIVE=$(mktemp) && time wget --no-check-certificate -O $ARCHIVE "$DT_API_URL/v1/deployment/installer/agent/unix/paas/latest?Api-Token=$DT_PAAS_TOKEN&$DT_ONEAGENT_OPTIONS" && time unzip -o -d /opt/dynatrace/oneagent $ARCHIVE && rm -f $ARCHIVE
+          env:
+            - name: DT_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-oneagent
+                  key: api-url
+            - name: DT_PAAS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-oneagent
+                  key: paas-installer-download-token
+            - name: DT_ONEAGENT_OPTIONS
+              value: flavor=multidistro&include=java
+          volumeMounts:
+            - mountPath: /opt/dynatrace/oneagent
+              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "quay.io/ukhomeofficedigital/dsa-re-registration-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -81,14 +105,20 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.persistenceCredentialsSecretName }}
                   key: password
-          {{- with .Values.volumeMounts }}
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+            - name: LD_PRELOAD
+              value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+          {{- end -}}
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
+            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              mountPath: /opt/dynatrace/oneagent
+          {{- end -}}
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+          emptyDir: {}
+      {{- end -}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

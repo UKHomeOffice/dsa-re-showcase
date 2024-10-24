@@ -15,7 +15,7 @@ imagePullSecrets: []
 
 dynatrace:
   podRuntimeInjection:
-    enabled: false
+    enabled: true
 
 image:
   pullPolicy: Always
