@@ -39,7 +39,6 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
-              protocol: TCP
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -48,7 +47,7 @@ spec:
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /
+              path: /actuator/health/readiness
               port: http
             initialDelaySeconds: 60
             periodSeconds: 30
