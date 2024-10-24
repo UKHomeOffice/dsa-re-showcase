@@ -8,17 +8,6 @@ platform:
 
 steps:
 
-  - name: helm_push
-    image: plugins/helm-push
-    settings:
-      registry_url: quay.io
-      registry_username:
-        from_secret: ROBOT_QUAY_USER
-      registry_password:
-        from_secret: ROBOT_QUAY_PASS
-      chart_path: backend/registration-service/registration-service-chart
-      registry_namespace: ukhomeofficedigital/dsa-re-registration-service
-
   - name: docker
     image: plugins/docker
     settings:
@@ -70,6 +59,3 @@ trigger:
   #     - helm version
   #     - kubectl version
 
-trigger:
-  event:
-  - push
