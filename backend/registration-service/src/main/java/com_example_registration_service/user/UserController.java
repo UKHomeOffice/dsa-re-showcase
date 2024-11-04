@@ -33,7 +33,7 @@ public class UserController {
   
   @PostMapping
   public ResponseEntity<User> registerNewUser(@RequestBody User user) {
-    return userService.addNewUser(user);
+    throw new RuntimeException("Simulated exception to trigger high error rate.");
   }
   
   @DeleteMapping(path = "{userId}")
