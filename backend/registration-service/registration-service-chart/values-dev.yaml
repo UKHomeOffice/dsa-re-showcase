@@ -1,9 +1,7 @@
 namespaceToAllowEgress:
   - dynatrace
 
-ipBlockToAllowEgress:
-  - 10.250.24.0/21
-  - 10.250.96.0/19
+ipBlockToAllowEgress: []
 
 serviceAccount:
   create: true
