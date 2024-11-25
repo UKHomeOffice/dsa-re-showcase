@@ -13,7 +13,7 @@ import jakarta.persistence.Transient;
 
 
 @Entity
-@Table(name = "registered_users")
+@Table(name = "users")
 
 public class User {
   @Id
