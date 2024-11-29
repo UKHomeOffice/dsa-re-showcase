@@ -1,0 +1,28 @@
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  type: ClusterIP
+  port: 80
+
+imagePullSecrets: []
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+
+image:
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# DO WE NEED THIS FOR FRONTEND?
+persistenceCredentialsSecretName: dsaredevshowcase-rds
