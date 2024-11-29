@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "frontend-service.fullname" . }}
+  labels:
+    {{- include "frontend-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "frontend-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "frontend-service.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "frontend-service.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+      initContainers:
+        - name: install-oneagent
+          image: {{ (((.Values).dynatrace).podRuntimeInjection).image | default "quay.io/ukhomeofficedigital/alpine:v3.15" | quote }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - 'date'
+          env:
+            - name: DT_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-service-dynatrace-oneagent
+                  key: api-url
+            - name: DT_PAAS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-service-dynatrace-oneagent
+                  key: paas-installer-download-token
+            - name: DT_ONEAGENT_OPTIONS
+              value: flavor=multidistro&include=java
+          volumeMounts:
+            - mountPath: /opt/dynatrace/oneagent
+              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "quay.io/ukhomeofficedigital/dsa-re-frontend-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: JAVA_OPTIONS
+              value: -Dspring.profiles.active={{ .Release.Namespace }}
+            - name: SHOWCASE_SERVICES_DB_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  key: endpoint
+            - name: SHOWCASE_SERVICES_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  key: port
+            - name: SHOWCASE_SERVICES_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  key: default_db
+            - name: SHOWCASE_SERVICES_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  key: username
+            - name: SHOWCASE_SERVICES_DB_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  key: password
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+            - name: LD_PRELOAD
+              value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+          {{- end -}}
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+          volumeMounts:
+            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              mountPath: /opt/dynatrace/oneagent
+          {{- end -}}
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+      volumes:
+        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+          emptyDir: {}
+      {{- end -}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
