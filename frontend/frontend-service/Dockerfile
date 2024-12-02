@@ -25,8 +25,8 @@ WORKDIR /usr/share/nginx/html
 # Copy built React files to nginx default location
 COPY --from=builder /app/build .
 
-RUN chmod -R 755 /usr/share/nginx/html \
-    chown -R 1000:1000 /usr/share/nginx/htnl && \
+RUN chmod -R 755 /usr/share/nginx/html && \
+    chown -R 1000:1000 /usr/share/nginx/html && \
     chmod -R 755 /var/cache/nginx /var/run /etc/nginx/conf.d && \
     chown -R 1000:1000 /var/cache/nginx /var/run /etc/nginx/conf.d
 USER 1000
