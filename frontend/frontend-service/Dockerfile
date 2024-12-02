@@ -18,10 +18,14 @@ RUN npm run build
 
 # Serve stage
 FROM quay.io/ukhomeofficedigital/dsa-re-nginx:1.25.2-alpine AS serve
+
+# Set working directory
 WORKDIR /usr/share/nginx/html
 
 # Copy built React files to nginx default location
 COPY --from=builder /app/build .
+
+RUN chmod -R 755 /var/cache/nginx
 
 # Expose port 80
 EXPOSE 80
