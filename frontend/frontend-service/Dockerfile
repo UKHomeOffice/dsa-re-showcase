@@ -29,7 +29,8 @@ COPY --from=builder /app/build .
 RUN chmod -R 755 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx && \
     chown -R 1000:1000 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx 
 
-RUN chown 1000:1000 /var/run/nginx.pid && \
+RUN touch /var/run/nginx/pid && \
+    chown 1000:1000 /var/run/nginx.pid && \
     chmod 644 /var/run/nginx.pid
 
 # Switch to non-root user
