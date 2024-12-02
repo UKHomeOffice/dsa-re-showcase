@@ -16,6 +16,12 @@ COPY . .
 # Install dependencies
 RUN npm run build
 
+RUN npm install -g serve
+
+EXPOSE 3030
+
+CMD ["serve", "-s", "build", "-l", "3000"]
+
 # # Serve stage
 # FROM quay.io/ukhomeofficedigital/dsa-re-nginx:1.25.2-alpine AS serve
 
