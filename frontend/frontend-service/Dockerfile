@@ -25,10 +25,11 @@ WORKDIR /usr/share/nginx/html
 # Copy built React files to nginx default location
 COPY --from=builder /app/build .
 
-RUN chmod -R 755 /usr/share/nginx/html && \
-    chown -R 1000:1000 /usr/share/nginx/html && \
-    chmod -R 755 /var/cache/nginx /var/run /etc/nginx/conf.d && \
-    chown -R 1000:1000 /var/cache/nginx /var/run /etc/nginx/conf.d
+# Set permissions globally in dockerfile
+RUN chmod -R 755 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx && \
+    chown -R 1000:1000 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
+
+# Switch to non-root user
 USER 1000
 
 # Expose port 80
