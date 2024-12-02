@@ -26,7 +26,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=builder /app/build .
 
 # Copy over custom nginx.conf file
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY /nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Set permissions globally in dockerfile
 RUN chown -R 1000:1000 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx \
