@@ -25,7 +25,8 @@ WORKDIR /usr/share/nginx/html
 # Copy built React files to nginx default location
 COPY --from=builder /app/build .
 
-RUN chmod -R 755 /var/cache/nginx
+RUN chmod -R 755 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
+USER 1001
 
 # Expose port 80
 EXPOSE 80
