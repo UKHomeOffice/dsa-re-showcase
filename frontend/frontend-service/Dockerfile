@@ -26,7 +26,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=builder /app/build .
 
 RUN chmod -R 755 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
-USER 1001
+USER 1000
 
 # Expose port 80
 EXPOSE 80
