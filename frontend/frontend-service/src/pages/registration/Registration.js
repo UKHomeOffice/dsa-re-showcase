@@ -2,6 +2,7 @@ import React from "react";
 import "./Registration.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import config from "../../config";
 
 const Registration = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const Registration = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/user", {
+      const response = await fetch(`${config.API_URL}/api/v1/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
