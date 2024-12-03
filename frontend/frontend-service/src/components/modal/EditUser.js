@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./EditUser.css";
+import config from "../../config";
 
 const EditUser = ({ user, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({ ...user });
@@ -15,7 +16,7 @@ const EditUser = ({ user, onClose, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`http://localhost:8080/api/v1/user/${user.id}`, {
+    await fetch(`${config.API_URL}/api/v1/user/${user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
