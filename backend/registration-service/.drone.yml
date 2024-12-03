@@ -1,6 +1,6 @@
 kind: pipeline
 type: kubernetes
-name: build-test
+name: registration-service-build-test
 
 platform:
   os: linux

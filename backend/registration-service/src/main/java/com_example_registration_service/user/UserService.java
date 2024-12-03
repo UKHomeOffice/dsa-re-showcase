@@ -1,7 +1,7 @@
 package com_example_registration_service.user;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+// import java.security.MessageDigest;
+// import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.Transactional;
 
@@ -32,7 +35,7 @@ public class UserService {
     if (userOptional.isPresent())  {
       throw new IllegalStateException("This email is taken");
       }
-      user.setPassword(hashPassword(user.getPassword()));
+      user.setPassword(user.getPassword());
       User savedUser = userRepository.save(user);
       return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); // Return the saved user
     }
@@ -61,28 +64,41 @@ public User updateUser(Long userId, User updatedUser) {
     
   }
   
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
   public Optional<User> authenticateUser(String email, String password) {
     Optional<User> userOptional = userRepository.findUserByEmail(email);
-    if (userOptional.isPresent() && userOptional.get().getPassword().equals(hashPassword(password))) {
+    if (userOptional.isPresent()) {
+      logger.debug("User found: {}", userOptional.get().getEmail());
+      logger.debug("Database password: {}", userOptional.get().getPassword());
+      logger.debug("Provided password: {}", password);
+
+      if (userOptional.get().getPassword().equals(password)) {
+        logger.debug("Passwords match!");
         return userOptional;
+      } else {
+        logger.debug("Password mismatch!");
+      }
+    } else {
+        logger.debug("User not found for email: {}", email);
     }
-    return Optional.empty(); // No valid user found or password mismatch
+    return Optional.empty();
   }
   
-  public String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
+  // public String hashPassword(String password) {
+  //       try {
+  //           MessageDigest digest = MessageDigest.getInstance("SHA-256");
+  //           byte[] hash = digest.digest(password.getBytes());
+  //           StringBuilder hexString = new StringBuilder();
 
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            } 
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  //           for (byte b : hash) {
+  //               String hex = Integer.toHexString(0xff & b);
+  //               if (hex.length() == 1) hexString.append('0');
+  //               hexString.append(hex);
+  //           } 
+  //           return hexString.toString();
+  //       } catch (NoSuchAlgorithmException e) {
+  //           throw new RuntimeException(e);
+  //       }
+  //   }
 }
