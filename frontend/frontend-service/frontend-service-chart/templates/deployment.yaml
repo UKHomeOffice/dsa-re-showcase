@@ -62,18 +62,23 @@ spec:
           image: "quay.io/ukhomeofficedigital/dsa-re-frontend-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 8080
+          - containerPort: 3000
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: 3000
+              httpHeaders:
+              - name: Host
+                value: localhost
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: 3000
+              httpHeaders:
+              - name: Host
+                value: localhost
             initialDelaySeconds: 60
             periodSeconds: 30
           resources:
