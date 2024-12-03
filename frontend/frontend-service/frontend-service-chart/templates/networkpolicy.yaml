@@ -7,20 +7,14 @@ metadata:
 spec:
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: {{ .Release.Namespace }}
-  egress:
-    - to:
-      {{- range .Values.namespaceToAllowEgress }}
       - namespaceSelector:
           matchLabels:
-            name: {{ . }}
-      {{- end }}
-      {{- range .Values.ipBlockToAllowEgress }}
-      - ipBlock:
-          cidr: {{ . }}
-     {{- end }}
+            name: {{ .Release.Namespace }}
+      - namespaceSelector:
+          matchLabels:
+            name: ingress-internal
+  egress:
+    - {}
   podSelector:
     matchLabels:
       {{- include "frontend-service.selectorLabels" . | nindent 6 }}
