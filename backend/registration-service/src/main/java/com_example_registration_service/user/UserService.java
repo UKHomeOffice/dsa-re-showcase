@@ -1,7 +1,7 @@
 package com_example_registration_service.user;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+// import java.security.MessageDigest;
+// import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.Transactional;
 
@@ -61,21 +64,23 @@ public User updateUser(Long userId, User updatedUser) {
     
   }
   
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
   public Optional<User> authenticateUser(String email, String password) {
     Optional<User> userOptional = userRepository.findUserByEmail(email);
     if (userOptional.isPresent()) {
-      System.out.println("User found: " + userOptional.get().getEmail());
-      System.out.println("Database password: " + userOptional.get().getPassword());
-      System.out.println("Provided password: " + password);
+      logger.debug("User found: {}", userOptional.get().getEmail());
+      logger.debug("Database password: {}", userOptional.get().getPassword());
+      logger.debug("Provided password: {}", password);
 
       if (userOptional.get().getPassword().equals(password)) {
-          System.out.println("Passwords match!");
-          return userOptional;
+        logger.debug("Passwords match!");
+        return userOptional;
       } else {
-          System.out.println("Password mismatch!");
+        logger.debug("Password mismatch!");
       }
     } else {
-        System.out.println("User not found for email: " + email);
+        logger.debug("User not found for email: {}", email);
     }
     return Optional.empty();
   }
