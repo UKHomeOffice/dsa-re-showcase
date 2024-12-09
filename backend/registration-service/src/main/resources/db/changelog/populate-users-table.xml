@@ -10,14 +10,14 @@
             <column name="name" value="Chris"/>
             <column name="email" value="Chris.Hunter@gmail.com"/>
             <column name="dob" value="1989-07-27"/>
-            <column name="password" value="chrispassword"/>
+            <column name="password" value="5d41402abc4b2a76b9719d911017c592"/>
             <column name="role" value="customer"/>
         </insert>
         <insert tableName="users">
             <column name="name" value="Michael"/>
             <column name="email" value="Michael.McCarthy@gmail.com"/>
             <column name="dob" value="1984-11-12"/>
-            <column name="password" value="michaelpassword"/>
+            <column name="password" value="7d793037a0760186574b0282f2f435e7"/>
             <column name="role" value="admin"/>
         </insert>
     </changeSet>
