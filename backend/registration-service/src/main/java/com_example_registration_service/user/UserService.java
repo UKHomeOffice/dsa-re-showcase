@@ -63,10 +63,21 @@ public User updateUser(Long userId, User updatedUser) {
   
   public Optional<User> authenticateUser(String email, String password) {
     Optional<User> userOptional = userRepository.findUserByEmail(email);
-    if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
-        return userOptional;
+    if (userOptional.isPresent()) {
+      System.out.println("User found: " + userOptional.get().getEmail());
+      System.out.println("Database password: " + userOptional.get().getPassword());
+      System.out.println("Provided password: " + password);
+
+      if (userOptional.get().getPassword().equals(password)) {
+          System.out.println("Passwords match!");
+          return userOptional;
+      } else {
+          System.out.println("Password mismatch!");
+      }
+    } else {
+        System.out.println("User not found for email: " + email);
     }
-    return Optional.empty(); // No valid user found or password mismatch
+    return Optional.empty();
   }
   
   // public String hashPassword(String password) {
