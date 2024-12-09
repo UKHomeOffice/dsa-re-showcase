@@ -32,7 +32,7 @@ public class UserService {
     if (userOptional.isPresent())  {
       throw new IllegalStateException("This email is taken");
       }
-      user.setPassword(hashPassword(user.getPassword()));
+      user.setPassword(user.getPassword());
       User savedUser = userRepository.save(user);
       return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); // Return the saved user
     }
@@ -63,26 +63,26 @@ public User updateUser(Long userId, User updatedUser) {
   
   public Optional<User> authenticateUser(String email, String password) {
     Optional<User> userOptional = userRepository.findUserByEmail(email);
-    if (userOptional.isPresent() && userOptional.get().getPassword().equals(hashPassword(password))) {
+    if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
         return userOptional;
     }
     return Optional.empty(); // No valid user found or password mismatch
   }
   
-  public String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
+  // public String hashPassword(String password) {
+  //       try {
+  //           MessageDigest digest = MessageDigest.getInstance("SHA-256");
+  //           byte[] hash = digest.digest(password.getBytes());
+  //           StringBuilder hexString = new StringBuilder();
 
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            } 
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  //           for (byte b : hash) {
+  //               String hex = Integer.toHexString(0xff & b);
+  //               if (hex.length() == 1) hexString.append('0');
+  //               hexString.append(hex);
+  //           } 
+  //           return hexString.toString();
+  //       } catch (NoSuchAlgorithmException e) {
+  //           throw new RuntimeException(e);
+  //       }
+  //   }
 }
