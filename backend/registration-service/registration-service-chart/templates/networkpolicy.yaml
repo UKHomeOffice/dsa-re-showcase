@@ -7,9 +7,9 @@ metadata:
 spec:
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+      - namespaceSelector:
+          matchLabels:
+            name: {{ .Release.Namespace }}
   egress:
     - {}
   podSelector:
