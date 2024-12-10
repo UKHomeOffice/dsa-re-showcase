@@ -6,10 +6,7 @@ metadata:
     {{- include "registration-service.labels" . | nindent 4 }}
 spec:
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+    - {}
   egress:
     - {}
   podSelector:
