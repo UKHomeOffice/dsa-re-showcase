@@ -4,6 +4,9 @@ FROM quay.io/ukhomeofficedigital/dsa-re-node-18-alpine:18-alpine3.19 AS builder
 #Set working directory
 WORKDIR /app
 
+# Install curl
+RUN apk add --no-cache curl
+
 # Copy over packages
 COPY package.json package-lock.json ./
 
