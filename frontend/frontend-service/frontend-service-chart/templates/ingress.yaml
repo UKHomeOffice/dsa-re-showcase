@@ -17,6 +17,16 @@ spec:
       paths:
       - backend:
           service:
+            name: registration-service
+            port:
+              number: 80
+        path: /api
+        pathType: Prefix
+  - host: "frontend-service.dev.dsa-re-notprod.homeoffice.gov.uk"
+    http:
+      paths:
+      - backend:
+          service:
             name: frontend-service
             port:
               number: 80
