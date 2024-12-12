@@ -10,6 +10,9 @@ spec:
       - namespaceSelector:
           matchLabels:
             name: {{ .Release.Namespace }}
+      - namespaceSelector:
+          matchLabels:
+            name: ingress-internal
   egress:
     - {}
   podSelector:
