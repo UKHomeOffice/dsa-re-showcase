@@ -5,7 +5,7 @@ metadata:
     meta.helm.sh/release-name: "frontend-service-server-internal"
     meta.helm.sh/release-namespace: "dsa-re-dev"
     # Indicate the ingress SHOULD speak TLS between itself and pods (best-practice)
-    ingress.kubernetes.io/backend-protocol: "HTTP"
+    ingress.kubernetes.io/backend-protocol: "HTTPS"
   name: frontend-service-server-internal
   labels:
     app.kubernetes.io/managed-by: "Helm"
