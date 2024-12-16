@@ -26,6 +26,15 @@ steps:
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
       - helm version
+      - kubectl version
+    environment:
+      KUBE_NAMESPACE:
+        from_secret: KUBE_NAMESPACE_DEV
+      KUBE_SERVER:
+        from_secret: KUBE_SERVER
+      KUBE_TOKEN:
+        from_secret: KUBE_TOKEN_DEV
+
 
 trigger:
   event:
