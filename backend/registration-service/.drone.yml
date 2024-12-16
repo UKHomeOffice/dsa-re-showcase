@@ -32,7 +32,8 @@ steps:
       - kubectl config set-credentials helm --token=$KUBE_TOKEN
       - kubectl config set-context $KUBE_CLUSTER_NAME --cluster=$KUBE_CLUSTER_NAME --user=helm
       - kubectl config use-context $KUBE_CLUSTER_NAME
-      - kubectl version
+      - helm package --dependency-update registration-service-chart --version 0.0.0-dev
+      - helm lint registration-service-0.0.0-dev --namespace $KUBE_NAMESPACE --kube-version=$KUBE_VERSION --values=registration-service-chart/values-dev.yaml
     environment:
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
@@ -40,6 +41,8 @@ steps:
         from_secret: KUBE_SERVER_NOTPROD
       KUBE_TOKEN:
         from_secret: KUBE_TOKEN_DEV
+      KUBE_VERSION:
+        from_secret: KUBE_VERSION_NOTPROD
       KUBE_CERTIFICATE_AUTHORITY_DATA:
         from_secret: KUBE_CERTIFICATE_AUTHORITY_DATA_NOTPROD
       KUBE_CLUSTER_NAME:
