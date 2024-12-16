@@ -25,7 +25,13 @@ steps:
   - name: helm-package
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
-      - /entrypoint.sh version
+      - pwd
+      - ls
+      - kubectl config set-cluster $KUBE_CLUSTER_NAME --server=$KUBE_SERVER
+      - kubectl config set clusters.$KUBE_CLUSTER_NAME.certificate-authority-data $KUBE_CERTIFICATE_AUTHORITY_DATA
+      - kubectl config set-credentials helm --token=$KUBE_TOKEN
+      - kubectl config set-context $KUBE_CLUSTER_NAME --cluster=$KUBE_CLUSTER_NAME --user=helm
+      - kubectl config use-context $KUBE_CLUSTER_NAME
       - kubectl version
     environment:
       KUBE_NAMESPACE:
