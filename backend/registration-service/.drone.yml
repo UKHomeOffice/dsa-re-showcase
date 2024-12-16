@@ -22,6 +22,11 @@ steps:
       password:
         from_secret: ROBOT_QUAY_PASS
 
+  - name: helm-package
+    image: quay.io/ukhomeofficedigital/helm:v3.5.4
+    commands:
+      - helm version
+
 trigger:
   event:
   - push
