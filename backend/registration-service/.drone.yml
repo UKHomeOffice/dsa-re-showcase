@@ -25,7 +25,7 @@ steps:
   - name: helm-package
     image: quay.io/ukhomeofficedigital/helm:v3.5.4
     commands:
-      - ./entrypoint.sh version
+      - /entrypoint.sh version
       - kubectl version
     environment:
       KUBE_NAMESPACE:
