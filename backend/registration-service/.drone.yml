@@ -27,13 +27,18 @@ steps:
     commands:
       - helm version
       - kubectl version
+      - helm list
     environment:
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
       KUBE_SERVER:
-        from_secret: KUBE_SERVER
+        from_secret: KUBE_SERVER_NOTPROD
       KUBE_TOKEN:
         from_secret: KUBE_TOKEN_DEV
+      KUBE_CERTIFICATE_AUTHORITY_DATA:
+        from_secret: KUBE_CERTIFICATE_AUTHORITY_DATA_NOTPROD
+      KUBERNETES_CLUSTER_NAME:
+        from_secret: KUBE_CLUSTER_NAME_NOTPROD
 
 
 trigger:
