@@ -22,7 +22,7 @@ steps:
   #     password:
   #       from_secret: ROBOT_QUAY_PASS
 
-  - name: helm-package
+  - name: helm-test-and-package
     image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
     commands:
       - kubectl config set-cluster $KUBE_CLUSTER_NAME --server=$KUBE_SERVER
@@ -32,6 +32,7 @@ steps:
       - kubectl config use-context $KUBE_CLUSTER_NAME
       - helm package --dependency-update backend/registration-service/registration-service-chart --version 0.0.0-dev
       - helm lint registration-service-0.0.0-dev.tgz --namespace $KUBE_NAMESPACE --kube-version=$KUBE_VERSION --values=backend/registration-service/registration-service-chart/values-dev.yaml
+      - helm install registration-service --values=backend/registration-service/registration-service-chart/values-dev.yaml registration-service-0.0.0-dev.tgz --dry-run --debug
     environment:
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
