@@ -32,7 +32,7 @@ steps:
       - kubectl config use-context $KUBE_CLUSTER_NAME
       - helm package --dependency-update backend/registration-service/registration-service-chart --version 0.0.0-dev
       - helm lint registration-service-0.0.0-dev.tgz --namespace $KUBE_NAMESPACE --kube-version=$KUBE_VERSION --values=backend/registration-service/registration-service-chart/values-dev.yaml
-      - helm install registration-service --namespace $KUBE_NAMESPACE --kube-version=$KUBE_VERSION --values=backend/registration-service/registration-service-chart/values-dev.yaml registration-service-0.0.0-dev.tgz --dry-run --debug
+      - helm install registration-service --namespace $KUBE_NAMESPACE --values=backend/registration-service/registration-service-chart/values-dev.yaml registration-service-0.0.0-dev.tgz --dry-run --debug
     environment:
       KUBE_NAMESPACE:
         from_secret: KUBE_NAMESPACE_DEV
