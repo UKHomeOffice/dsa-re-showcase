@@ -18,6 +18,9 @@ imagePullSecrets: []
 dynatrace:
   podRuntimeInjection:
     enabled: true
+  customMetrics:
+    url:
+    tokenSecretName:
 
 image:
   pullPolicy: Always
@@ -25,3 +28,5 @@ image:
   tag: "latest"
 
 persistenceCredentialsSecretName: dsaredevshowcase-rds
+
+
