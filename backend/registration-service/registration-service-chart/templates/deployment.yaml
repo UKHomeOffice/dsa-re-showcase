@@ -39,7 +39,7 @@ spec:
             - /bin/sh
           args:
             - -c
-            - ARCHIVE=$(mktemp) && time wget --no-check-certificate -O $ARCHIVE "$DT_API_URL/v1/deployment/installer/agent/unix/paas/latest?Api-Token=$DT_PAAS_TOKEN&$DT_ONEAGENT_OPTIONS" && time unzip -o -d /opt/dynatrace/oneagent $ARCHIVE && rm -f $ARCHIVE
+            - ARCHIVE=$(mktemp) && time wget --no-check-certificate -O $ARCHIVE "$DT_API_URL/v1/deployment/installer/agent/unix/paas/version/$DT_ONEAGENT_VERSION?Api-Token=$DT_PAAS_TOKEN&$DT_ONEAGENT_OPTIONS" && time unzip -o -d /opt/dynatrace/oneagent $ARCHIVE && rm -f $ARCHIVE
           env:
             - name: DT_API_URL
               valueFrom:
@@ -53,6 +53,8 @@ spec:
                   key: paas-installer-download-token
             - name: DT_ONEAGENT_OPTIONS
               value: flavor=multidistro&include=java
+            - name: DT_ONEAGENT_VERSION
+              value: 1.303.42.20241104-145223
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
