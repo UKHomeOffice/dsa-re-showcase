@@ -18,15 +18,10 @@ imagePullSecrets: []
 dynatrace:
   podRuntimeInjection:
     enabled: true
-  customMetrics:
-    url:
-    tokenSecretName:
 
 image:
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
-
-persistenceCredentialsSecretName: dsaredevshowcase-rds
 
 
