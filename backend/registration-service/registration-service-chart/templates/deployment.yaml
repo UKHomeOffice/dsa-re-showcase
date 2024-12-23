@@ -81,6 +81,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+            - name: GIT_REF
+              value: 
             - name: JAVA_OPTIONS
               value: -Dspring.profiles.active={{ .Release.Namespace }}
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
