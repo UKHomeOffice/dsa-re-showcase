@@ -96,14 +96,6 @@ This repository contains the Registration microservice for the Showcase Services
   spring.datasource.username=yourusername
   spring.datasource.password=yourpassword
   ```
-### Containerised PostgreSQL
-
-For the purposes of getting up and running while a RDS instance was provisioned, a containerised version of PostgreSQL was deployed to the dsa-re-dev namespace using Helm and [an off-the-shelf Chart from bitnami](https://artifacthub.io/packages/helm/bitnami/postgresql). The values file for this can be found [here](./containerised-db-values-dev.yaml), and this was deployed as below:
-
-```bash
-$ helm repo add bitnami https://charts.bitnami.com/bitnami # Adds repo to the local Helm client
-$ helm install registration-service-postgresql bitnami/postgresql --version 16.0.4 --values=containerised-db-values-dev.yaml
-```
 
 ## Contributing
 
