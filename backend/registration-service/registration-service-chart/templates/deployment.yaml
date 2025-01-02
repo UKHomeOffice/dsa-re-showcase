@@ -81,33 +81,45 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+            - name: RANDOM
+              value: {{ randAlphaNum 5 | quote }}
             - name: JAVA_OPTIONS
               value: -Dspring.profiles.active={{ .Release.Namespace }}
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  name: dsaredevshowcase-rds
                   key: endpoint
             - name: SHOWCASE_SERVICES_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  name: dsaredevshowcase-rds
                   key: port
             - name: SHOWCASE_SERVICES_DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  name: dsaredevshowcase-rds
                   key: default_db
             - name: SHOWCASE_SERVICES_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  name: dsaredevshowcase-rds
                   key: username
             - name: SHOWCASE_SERVICES_DB_PWD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
+                  name: dsaredevshowcase-rds
                   key: password
+            - name: DYNATRACE_METRICS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-metrics-ingest
+                  key: token
+            - name: DYNATRACE_METRICS_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-metrics-ingest
+                  key: api_url
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
