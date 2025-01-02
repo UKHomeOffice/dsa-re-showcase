@@ -39,7 +39,7 @@ spec:
             - /bin/sh
           args:
             - -c
-            - 'date'
+            - ARCHIVE=$(mktemp) && time wget --no-check-certificate -O $ARCHIVE "$DT_API_URL/v1/deployment/installer/agent/unix/paas/version/$DT_ONEAGENT_VERSION?Api-Token=$DT_PAAS_TOKEN&$DT_ONEAGENT_OPTIONS" && time unzip -o -d /opt/dynatrace/oneagent $ARCHIVE && rm -f $ARCHIVE
           env:
             - name: DT_API_URL
               valueFrom:
