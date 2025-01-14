@@ -19,7 +19,7 @@ RUN curl -L "https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_V
 
 RUN adduser -D -u 1000 reliabilityenablement
 
-ENV PATH="$PATH:/opt/kafka/bin"
+RUN echo 'export PATH="/opt/kafka/bin:$PATH"' >> /home/reliabilityenablement/.bashrc
 
 USER 1000
 
