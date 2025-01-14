@@ -19,8 +19,8 @@ RUN curl -L "https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_V
 
 RUN adduser -D -u 1000 reliabilityenablement
 
-USER 1000
-
 ENV PATH="$PATH:/opt/kafka/bin"
+
+USER 1000
 
 CMD ["/bin/bash", "--login"]
