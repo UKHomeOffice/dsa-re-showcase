@@ -52,7 +52,9 @@ spec:
                   name: frontend-service-dynatrace-oneagent
                   key: paas-installer-download-token
             - name: DT_ONEAGENT_OPTIONS
-              value: flavor=multidistro&include=java
+              value: flavor=multidistro&include=nodejs
+            - name: DT_ONEAGENT_VERSION
+              value: 1.303.42.20241104-145223
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
