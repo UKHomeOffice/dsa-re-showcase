@@ -19,11 +19,11 @@ COPY . .
 # Build react app
 RUN npm run build
 
-# Install static ffile server
+# Install static file server
 RUN npm install -g serve
 
 # Expose port
-EXPOSE 3030
+EXPOSE 3000
 
 # Start static file server and expose react app on 3000
 CMD ["serve", "-s", "build", "-l", "3000"]
