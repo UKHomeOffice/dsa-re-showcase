@@ -10,42 +10,20 @@ RUN apk add --no-cache curl
 # Copy over packages
 COPY package.json package-lock.json ./
 
-# Install dependencies
+# Install dendencies
 RUN npm install
 
 # Copy code files
 COPY . .
 
-# Install dependencies
+# Build react app
 RUN npm run build
 
+# Install static ffile server
 RUN npm install -g serve
 
+# Expose port
 EXPOSE 3030
 
+# Start static file server and expose react app on 3000
 CMD ["serve", "-s", "build", "-l", "3000"]
-
-# # Serve stage
-# FROM quay.io/ukhomeofficedigital/dsa-re-nginx:1.25.2-alpine AS serve
-
-# # Set working directory
-# WORKDIR /usr/share/nginx/html
-
-# # Copy built React files to nginx default location
-# COPY --from=builder /app/build .
-
-# # Copy over custom nginx.conf file
-# COPY /nginx/nginx.conf /etc/nginx/nginx.conf
-
-# # Set permissions globally in dockerfile
-# RUN chown -R 1000:1000 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx \
-#     chmod -R 755 /usr/share/nginx/html /var/cache/nginx /var/run /etc/nginx
-
-# # Switch to non-root user
-# USER 1000
-
-# # Expose port 80
-# EXPOSE 80
-
-# # Run nginx
-# CMD ["nginx", "-g", "daemon off;"]

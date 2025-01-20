@@ -86,33 +86,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: JAVA_OPTIONS
-              value: -Dspring.profiles.active={{ .Release.Namespace }}
-            - name: SHOWCASE_SERVICES_DB_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
-                  key: endpoint
-            - name: SHOWCASE_SERVICES_DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
-                  key: port
-            - name: SHOWCASE_SERVICES_DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
-                  key: default_db
-            - name: SHOWCASE_SERVICES_DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
-                  key: username
-            - name: SHOWCASE_SERVICES_DB_PWD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.persistenceCredentialsSecretName }}
-                  key: password
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
