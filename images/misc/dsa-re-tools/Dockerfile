@@ -9,6 +9,8 @@ RUN apk -U upgrade \
         wget \
         busybox-extras \
         openjdk11 \
+        openssl \
+        aws-cli \
     && rm -rf /var/cache/apk/*
 
 # Download and install kafka
@@ -19,8 +21,8 @@ RUN curl -L "https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_V
 
 RUN adduser -D -u 1000 reliabilityenablement
 
-RUN echo 'export PATH="/opt/kafka/bin:$PATH"' >> /home/reliabilityenablement/.bashrc
-
 USER 1000
+
+RUN echo 'export PATH="/opt/kafka/bin:$PATH"' >> /home/reliabilityenablement/.profile
 
 CMD ["/bin/bash", "--login"]
