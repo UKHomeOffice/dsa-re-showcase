@@ -7,8 +7,6 @@ metadata:
     # Indicate the ingress SHOULD speak TLS between itself and pods (best-practice)
     ingress.kubernetes.io/backend-protocol: "HTTP"
   name: frontend-service-server-internal
-  labels:
-    app.kubernetes.io/managed-by: "Helm"
 spec:
   ingressClassName: "nginx-internal"
   rules:
