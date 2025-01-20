@@ -6,6 +6,9 @@ FROM quay.io/ukhomeofficedigital/dsa-re-amazoncorretto:21.0.5-alpine3.20 AS buil
 #Set working directory
 WORKDIR /app
 
+# Install curl
+RUN apk add --no-cache curl
+
 # Copy over maven wrapper files
 COPY mvnw .
 COPY mvnw.cmd .

@@ -1,0 +1,27 @@
+kind: pipeline
+type: kubernetes
+name: frontend-service-build-test
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: frontend/frontend-service/Dockerfile
+      registry: quay.io
+      context: frontend/frontend-service
+      tags:
+      - latest
+      repo: quay.io/ukhomeofficedigital/dsa-re-frontend-service
+      username:
+        from_secret: ROBOT_QUAY_USER
+      password:
+        from_secret: ROBOT_QUAY_PASS
+
+trigger:
+  event:
+  - push

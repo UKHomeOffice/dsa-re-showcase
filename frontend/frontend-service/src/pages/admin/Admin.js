@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Admin.css";
 import EditUser from "../../components/modal/EditUser";
+import config from "../../config";
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -9,7 +10,7 @@ const AdminPage = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await fetch("http://localhost:8080/api/v1/user");
+      const response = await fetch(`${config.API_URL}/api/v1/user`);
       const data = await response.json();
       setUsers(data);
     };
@@ -27,7 +28,7 @@ const AdminPage = () => {
     );
 
     if (confirmDelete) {
-      await fetch(`http://localhost:8080/api/v1/user/${id}`, {
+      await fetch(`${config.API_URL}/api/v1/user/${id}`, {
         method: "DELETE",
       });
     }
@@ -40,7 +41,7 @@ const AdminPage = () => {
   };
 
   const handleUpdate = async () => {
-    const response = await fetch("http://localhost:8080/api/v1/user");
+    const response = await fetch(`${config.API_URL}/api/v1/user`);
     const data = await response.json();
     setUsers(data);
     handleModalClose();
