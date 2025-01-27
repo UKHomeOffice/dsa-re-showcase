@@ -118,7 +118,7 @@ spec:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
-          {{- end -}}
+          {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
