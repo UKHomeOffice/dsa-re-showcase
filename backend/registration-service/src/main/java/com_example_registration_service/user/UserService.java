@@ -1,5 +1,7 @@
 package com_example_registration_service.user;
 
+import com_example_registration_service.*;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,10 @@ public class UserService {
   public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+  
+  // Inject the Kafka producer
+  @Autowired // ADDED
+  private RegistrationProducer registrationProducer; // ADDED
   
   public List<User> getUsers() {
       return userRepository.findAll();
@@ -73,6 +79,12 @@ public User updateUser(Long userId, User updatedUser) {
 
       if (userOptional.get().getPassword().equals(password)) {
         logger.debug("Passwords match!");
+
+        // Send Kafka message on successful login
+        String message = "User logged in: " + email; // ADDED
+        registrationProducer.sendMessage(message); // ADDED
+        logger.info("Kafka message sent: {}", message); // ADDED
+
         return userOptional;
       } else {
         logger.debug("Password mismatch!");
