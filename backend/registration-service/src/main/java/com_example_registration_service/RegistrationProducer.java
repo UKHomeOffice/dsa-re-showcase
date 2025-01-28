@@ -9,7 +9,7 @@ public class RegistrationProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Value("${kafka.topic.user-login}")
+    @Value("${spring.kafka.topic.user-login}")
     private String topic;
 
     public RegistrationProducer(KafkaTemplate<String, String> kafkaTemplate) {
