@@ -11,6 +11,7 @@ RUN apk -U upgrade \
         openjdk11 \
         openssl \
         aws-cli \
+        postgresql-client \
     && rm -rf /var/cache/apk/*
 
 # Download and install kafka
