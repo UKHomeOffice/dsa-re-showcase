@@ -48,6 +48,8 @@ spec:
                   key: paas-installer-download-token
             - name: DYNATRACE_ONEAGENT_OPTIONS
               value: flavor=multidistro&include=java
+            - name: DYNATRACE_INSTALL_DIR
+              value: /opt/dynatrace/oneagent
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
