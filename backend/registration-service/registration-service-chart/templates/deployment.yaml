@@ -34,27 +34,22 @@ spec:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
       initContainers:
         - name: install-oneagent
-          image: {{ (((.Values).dynatrace).podRuntimeInjection).image | default "quay.io/ukhomeofficedigital/alpine:v3.15" | quote }}
-          command:
-            - /bin/sh
-          args:
-            - -c
-            - ARCHIVE=$(mktemp) && time wget --no-check-certificate -O $ARCHIVE "$DT_API_URL/v1/deployment/installer/agent/unix/paas/version/$DT_ONEAGENT_VERSION?Api-Token=$DT_PAAS_TOKEN&$DT_ONEAGENT_OPTIONS" && time unzip -o -d /opt/dynatrace/oneagent $ARCHIVE && rm -f $ARCHIVE
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
           env:
-            - name: DT_API_URL
+            - name: DYNATRACE_API_URL
               valueFrom:
                 secretKeyRef:
                   name: registration-service-dynatrace-oneagent
                   key: api-url
-            - name: DT_PAAS_TOKEN
+            - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: registration-service-dynatrace-oneagent
                   key: paas-installer-download-token
-            - name: DT_ONEAGENT_OPTIONS
+            - name: DYNATRACE_ONEAGENT_OPTIONS
               value: flavor=multidistro&include=java
-            - name: DT_ONEAGENT_VERSION
-              value: 1.303.42.20241104-145223
+            - name: DYNATRACE_INSTALL_DIR
+              value: /opt/dynatrace/oneagent
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
