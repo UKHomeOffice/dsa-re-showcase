@@ -118,17 +118,22 @@ spec:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
-          {{- end -}}
-          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+          {{- end }}
           volumeMounts:
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
               mountPath: /opt/dynatrace/oneagent
-          {{- end -}}
-      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+          {{- end }}
+            - name: kafka-tls-storage
+              mountPath: /etc/kafka-tls
       volumes:
+      {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
           emptyDir: {}
-      {{- end -}}
+      {{- end }}
+        - name: kafka-tls-storage
+          persistentVolumeClaim:
+            claimName: showcase-storage-pvc
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
