@@ -65,14 +65,18 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
@@ -115,6 +119,10 @@ spec:
                 secretKeyRef:
                   name: registration-service-dynatrace-metrics-ingest
                   key: api_url
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx400m"
+            - name: KAFKA_CONFIG
+              value: "/etc/kafka-tls/client.properties"
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
