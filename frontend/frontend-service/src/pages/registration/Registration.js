@@ -32,16 +32,21 @@ const Registration = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Something went wrong!");
+      if (response.ok) {
+        console.log("Registration successful");
+        const user = await response.json();
+        if (user.role === "customer") {
+          navigate("/catalogue");
+        } else {
+          navigate("/admin");
+        }
+      } else {
+        const message = await response.text();
+        setError(message);
       }
-
-      const data = await response.json();
-      console.log("User registered successfully:", data);
-      navigate("/catalogue");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error during registration:", error);
+      setError("An error occurred. Please try again.");
     }
   };
 
