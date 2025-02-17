@@ -13,6 +13,8 @@ const Registration = () => {
     role: "",
   });
 
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
