@@ -4,6 +4,7 @@ import com_example_registration_service.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,18 @@ public class UserService {
       }
       user.setPassword(user.getPassword());
       User savedUser = userRepository.save(user);
-      return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); // Return the saved user
+
+      String message = String.format("User registered: %s, %s, %s, %s, %s", 
+      savedUser.getName(), 
+      savedUser.getEmail(), 
+      savedUser.getDob(),
+      savedUser.getRole(),
+      Instant.now().toString());
+
+      // Send Kafka message
+      registrationProducer.sendRegistrationMessage(message);
+      logger.info("Kafka registration message sent: {}", message);
+      return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
   public void deleteUser(Long userId) {
@@ -81,9 +93,12 @@ public User updateUser(Long userId, User updatedUser) {
         logger.debug("Passwords match!");
 
         // Send Kafka message on successful login
-        String message = "User logged in: " + email; // ADDED
-        registrationProducer.sendMessage(message); // ADDED
-        logger.info("Kafka message sent: {}", message); // ADDED
+        String message = String.format("User logged in: %s, %s, %s", 
+                userOptional.get().getName(),
+                userOptional.get().getEmail(),
+                Instant.now().toString());
+        registrationProducer.sendLoginMessage(message);
+        logger.info("Kafka message sent: {}", message);
 
         return userOptional;
       } else {
