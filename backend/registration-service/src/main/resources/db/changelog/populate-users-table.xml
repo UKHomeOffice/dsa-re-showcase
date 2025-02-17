@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="3" author="Chris Hunter" context="local,dsa-re-dev">
+    <changeSet id="2" author="Chris Hunter" context="local,dsa-re-dev">
         <insert tableName="users">
             <column name="name" value="Chris"/>
             <column name="email" value="Chris.Hunter@gmail.com"/>
@@ -20,5 +20,19 @@
             <column name="password" value="michaelpassword"/>
             <column name="role" value="admin"/>
         </insert>
+    </changeSet>
+
+    <!-- 3. Create the user_sequence (if it doesn't exist already) -->
+    <changeSet id="3" author="Chris Hunter">
+        <createSequence sequenceName="user_sequence" startValue="3" incrementBy="1"/>
+    </changeSet>
+
+    <!-- 4. Sync user_sequence to the max id in the users table -->
+    <changeSet id="4" author="Chris Hunter" context="local,dsa-re-dev">
+        <sql>
+            <![CDATA[
+            SELECT setval('user_sequence', (SELECT MAX(id) FROM users));
+            ]]>
+        </sql>
     </changeSet>
 </databaseChangeLog>

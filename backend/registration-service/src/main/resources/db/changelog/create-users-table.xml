@@ -5,14 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!--  Creates user sequence if it doesn't exist -->
     <changeSet id="1" author="Chris Hunter">
-        <sql>
-            CREATE SEQUENCE IF NOT EXISTS user_sequence START 1;
-        </sql>
-    </changeSet>
-
-    <changeSet id="2" author="Chris Hunter">
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
