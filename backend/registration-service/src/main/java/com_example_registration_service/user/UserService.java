@@ -37,9 +37,9 @@ public class UserService {
   public ResponseEntity addNewUser(User user) {
     Optional<User> userOptional = userRepository
       .findUserByEmail(user.getEmail());
-    if (userOptional.isPresent())  {
-      throw new IllegalStateException("This email is taken");
-      }
+    // if (userOptional.isPresent())  {
+    //   throw new IllegalStateException("This email is taken");
+    //   }
       user.setPassword(user.getPassword());
       User savedUser = userRepository.save(user);
 
