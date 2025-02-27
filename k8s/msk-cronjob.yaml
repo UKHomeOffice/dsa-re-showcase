@@ -1,0 +1,20 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: trigger-login
+  namespace: dsa-re-dev
+spec:
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 30
+      template:
+        spec:
+          containers:
+          - name: trigger-login
+            image: "quay.io/ukhomeofficedigital/dsa-re-msk-cron:latest"
+            imagePullPolicy: Always
+          restartPolicy: OnFailure

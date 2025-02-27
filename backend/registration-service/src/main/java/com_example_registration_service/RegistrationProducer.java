@@ -9,15 +9,24 @@ public class RegistrationProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
+    // Inject kafka-topics
     @Value("${spring.kafka.topic.user-login}")
-    private String topic;
+    private String loginTopic;
+
+    @Value("${spring.kafka.topic.user-registration}")
+    private String registrationTopic;
 
     public RegistrationProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendMessage(String message) {
-        kafkaTemplate.send(topic, message);
-        System.out.println("Message sent to Kafka: " + message);
+    public void sendLoginMessage(String message) {
+        kafkaTemplate.send(loginTopic, message);
+        System.out.println("Login message sent to Kafka: " + message);
+    }
+
+    public void sendRegistrationMessage(String message) {
+        kafkaTemplate.send(registrationTopic, message);
+        System.out.println("Registration message sent to Kafka: " + message);
     }
 }
