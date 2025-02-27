@@ -1,9 +1,23 @@
 #!/bin/bash
+set -e
 
-# Configuration
 REGISTRATION_SERVICE_URL="http://frontend-service.dev.dsa-re-notprod.homeoffice.gov.uk/api/v1/user"
-EMAIL="Chris.Hunter@gmail.com"
-PASSWORD="chrispassword"
+
+# Existing users
+USER1_EMAIL="Chris.Hunter@gmail.com"
+USER1_PASSWORD="chrispassword"
+
+USER2_EMAIL="Michael.McCarthy@gmail.com"
+USER2_PASSWORD="michaelpassword"
+
+# Select user
+if [ $(($RANDOM % 2)) -eq 0 ]; then
+	EMAIL=$USER1_EMAIL
+	PASSWORD=$USER1_PASSWORD
+else
+	EMAIL=$USER2_EMAIL
+	PASSWORD=$USER2_PASSWORD
+fi
 
 # Simulate login
 echo "Simulating login for user: $EMAIL"

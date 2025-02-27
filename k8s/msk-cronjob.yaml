@@ -4,9 +4,13 @@ metadata:
   name: trigger-login
   namespace: dsa-re-dev
 spec:
-  schedule: "*/3 * * * *"
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 30
       template:
         spec:
           containers:

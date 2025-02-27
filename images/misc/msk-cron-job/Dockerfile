@@ -2,7 +2,7 @@
 FROM alpine:latest
 
 # Install curl
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl bash
 
 # Set the working directory to /app
 WORKDIR /app
@@ -16,4 +16,4 @@ RUN adduser -D -u 1000 reliabilityenablement
 USER 1000
 
 # Set entrypoint
-ENTRYPOINT [ "/app/trigger_login.sh" ]
+ENTRYPOINT [ "/bin/bash", "/app/trigger_login.sh" ]
