@@ -69,7 +69,7 @@ spec:
               cpu: 100m
               memory: 512Mi
           command: ["/bin/sh"]
-          args: ["-c", "keytool -importkeystore -srckeystore $JAVA_HOME/lib/security/cacerts -destkeystore /certs/custom_truststore.jks -srcstoretype JKS -deststoretype JKS -storepass changeit"]
+          args: ["-c", "keytool -importkeystore -srckeystore $JAVA_HOME/lib/security/cacerts -destkeystore /certs/custom_truststore.jks -srcstoretype JKS -deststoretype JKS -storepass changeit -noprompt && keytool -import -alias ACPRootCA -keystore /certs/custom_truststore.jks -file /etc/ssl/certs/acp-root.crt -storepass changeit -noprompt"]
           volumeMounts:
             - name: bundle
               mountPath: /etc/ssl/certs
@@ -144,6 +144,8 @@ spec:
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
+                -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
+                -Djavax.net.ssl.trustStorePassword=changeit
             - name: KAFKA_CONFIG
               value: "/etc/kafka-tls/client.properties"
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
