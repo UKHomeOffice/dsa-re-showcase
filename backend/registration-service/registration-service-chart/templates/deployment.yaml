@@ -31,8 +31,8 @@ spec:
         fsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
-      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
       initContainers:
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
           image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
           env:
@@ -53,7 +53,29 @@ spec:
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
-      {{- end }}
+        {{- end }}
+        - name: configure-truststore
+          image: "quay.io/ukhomeofficedigital/dsa-re-registration-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: TRUSTSTORE_RUNTIME
+              value: /certs
+            - name: TRUSTSTORE_PASSWORD
+              value: changeit    
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512Mi
+          command: ["/bin/sh"]
+          args: ["-c", "keytool -importkeystore -srckeystore $JAVA_HOME/lib/security/cacerts -destkeystore /certs/custom_truststore.jks -srcstoretype JKS -deststoretype JKS -storepass changeit -noprompt && keytool -import -alias ACPRootCA -keystore /certs/custom_truststore.jks -file /etc/ssl/certs/acp-root.crt -storepass changeit -noprompt"]
+          volumeMounts:
+            - name: bundle
+              mountPath: /etc/ssl/certs
+              readOnly: true
+            - name: certs
+              mountPath: /certs
       containers:
         - name: {{ .Chart.Name }}
           image: "quay.io/ukhomeofficedigital/dsa-re-registration-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -120,7 +142,10 @@ spec:
                   name: registration-service-dynatrace-metrics-ingest
                   key: api_url
             - name: JAVA_OPTS
-              value: "-Xms256m -Xmx400m"
+              value: >
+                -Xms256m -Xmx400m
+                -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
+                -Djavax.net.ssl.trustStorePassword=changeit
             - name: KAFKA_CONFIG
               value: "/etc/kafka-tls/client.properties"
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
@@ -134,6 +159,9 @@ spec:
           {{- end }}
             - name: kafka-tls-storage
               mountPath: /etc/kafka-tls
+            - name: certs
+              mountPath: /certs
+              readOnly: true
       volumes:
       {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
@@ -142,6 +170,13 @@ spec:
         - name: kafka-tls-storage
           persistentVolumeClaim:
             claimName: showcase-storage-pvc
+        - name: certs
+          emptyDir: {}
+        - name: secrets
+          emptyDir: {}
+        - name: bundle
+          configMap:
+            name: bundle
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
