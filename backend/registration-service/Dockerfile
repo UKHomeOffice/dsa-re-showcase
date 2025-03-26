@@ -43,4 +43,4 @@ COPY --from=builder app/target/registration-service-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 # Run Springboot app
-ENTRYPOINT [ "java", "$JAVA_OPTS", "-jar", "app.jar" ]
+ENTRYPOINT [ "sh", "-c", "exec java $JAVA_OPTS -jar app.jar" ]
