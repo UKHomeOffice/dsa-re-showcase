@@ -104,8 +104,6 @@ spec:
           env:
             - name: RANDOM
               value: {{ randAlphaNum 5 | quote }}
-            - name: JAVA_OPTIONS
-              value: -Dspring.profiles.active={{ .Release.Namespace }}
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
@@ -144,6 +142,7 @@ spec:
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
+                -Dspring.profiles.active={{ .Release.Namespace }}
                 -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
                 -Djavax.net.ssl.trustStorePassword=changeit
             - name: KAFKA_CONFIG
