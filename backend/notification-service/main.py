@@ -4,6 +4,8 @@ import os
 from datetime import datetime
 import asyncio
 from kafka_consumer import start_consumer
+import oneagent
+import oneagent.sdk
 
 # Configure logging
 logging.basicConfig(
@@ -11,6 +13,12 @@ logging.basicConfig(
   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+sdk = oneagent.initialize()
+if not sdk:
+    logging.warning('Error initializing OneAgent SDK.')
+else:
+  logging.info('Dynatrace SDK successfully initialized.')
 
 # create FastAPI app
 app =FastAPI(title="Notification Service") 
@@ -62,7 +70,7 @@ def simulate_login(email: str = "user@example.com"):
 async def startup_event():
   """Start kafka consumer on startup"""
   asyncio.create_task(
-    start_consumer(bootstrap_servers=KAFKA_SERVERS, topic=KAFKA_TOPIC, group_id=KAFKA_GROUP_ID, recent_logins=recent_logins, max_logins=MAX_STORED_LOGINS)
+    start_consumer(bootstrap_servers=KAFKA_SERVERS, topic=KAFKA_TOPIC, group_id=KAFKA_GROUP_ID, recent_logins=recent_logins, max_logins=MAX_STORED_LOGINS, sdk=sdk)
   )
 
 if __name__ == "__main__":

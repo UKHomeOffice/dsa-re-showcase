@@ -8,7 +8,7 @@ import os
 
 logger = logging.getLogger(__name__)
     
-async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins):
+async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
   """Start consuming login events from kafka"""
   logging.info(f"Starting Kafka consumer: {bootstrap_servers}, topic: {topic}, group: {group_id}")
   
@@ -44,27 +44,37 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
         try:
             raw = message.value.decode('utf-8').strip()
             logging.info(f"Raw login message: {raw}")
+            
+            if not sdk:
+              logging.warning("Dynatrace SDK not initialized. Skipping tracing for this message.")
+            
+            if sdk:
+              with sdk.trace_custom_service('Process Kafka Login Message', 'notification-service') as tracer:
+                tracer.add_custom_request_attribute('kafka.topic', message.topic)
+                tracer.add_custom_request_attribute('kafka.partition', message.partition  )
+                tracer.add_custom_request_attribute('kafka.offset', message.offset)
+                tracer.add_custom_request_attribute('kafka.key', str(message.key))
 
-            # formatting:
-            parts = raw.split(", ")
-            if len(parts) == 3 and "User logged in: " in parts[0]:
-                name = parts[0].split("User logged in: ")[1].strip()
-                email = parts[1].strip()
-                timestamp = parts[2].strip()
+                # formatting:
+                parts = raw.split(", ")
+                if len(parts) == 3 and "User logged in: " in parts[0]:
+                    name = parts[0].split("User logged in: ")[1].strip()
+                    email = parts[1].strip()
+                    timestamp = parts[2].strip()
 
-                logging.info(f"Login detected: {name} ({email}) at {timestamp}")
-                logging.info(f"Notification sent to {email}")
+                    logging.info(f"Login detected: {name} ({email}) at {timestamp}")
+                    logging.info(f"Notification sent to {email}")
 
-                login_event = {
-                    "name": name,
-                    "email": email,
-                    "timestamp": timestamp
-                }
-                recent_logins.insert(0, login_event)
-                if len(recent_logins) > max_logins:
-                    recent_logins = recent_logins[:max_logins]
-            else:
-                logging.warning("Unexpected message format. Skipping.")
+                    login_event = {
+                        "name": name,
+                        "email": email,
+                        "timestamp": timestamp
+                    }
+                    recent_logins.insert(0, login_event)
+                    if len(recent_logins) > max_logins:
+                        recent_logins = recent_logins[:max_logins]
+                else:
+                    logging.warning("Unexpected message format. Skipping.")
 
         except Exception as e:
             logging.error(f"Error processing message: {e}")
