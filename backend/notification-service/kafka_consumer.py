@@ -49,11 +49,11 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
               logging.warning("Dynatrace SDK not initialized. Skipping tracing for this message.")
             
             if sdk:
-              with sdk.trace_custom_service('Process Kafka Login Message', 'notification-service') as tracer:
-                tracer.add_custom_request_attribute('kafka.topic', message.topic)
-                tracer.add_custom_request_attribute('kafka.partition', message.partition  )
-                tracer.add_custom_request_attribute('kafka.offset', message.offset)
-                tracer.add_custom_request_attribute('kafka.key', str(message.key))
+              with sdk.trace_custom_service('Process Kafka Login Message', 'notification-service'):
+                sdk.add_custom_request_attribute('kafka.topic', message.topic)
+                sdk.add_custom_request_attribute('kafka.partition', message.partition  )
+                sdk.add_custom_request_attribute('kafka.offset', message.offset)
+                sdk.add_custom_request_attribute('kafka.key', str(message.key))
 
                 # formatting:
                 parts = raw.split(", ")
