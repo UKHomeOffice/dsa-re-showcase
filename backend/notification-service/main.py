@@ -14,11 +14,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-sdk = oneagent.initialize()
-if not sdk:
-    logging.warning('Error initializing OneAgent SDK.')
+oneagent_init = oneagent.initialize()
+if not oneagent_init:
+  logging.warning('Error initializing OneAgent SDK.')
 else:
   logging.info('Dynatrace SDK successfully initialized.')
+  
+sdk = oneagent.get_sdk()
+if not sdk:
+  logging.warning('Error: OneAgent SDK failed to instantiate.')
+else:
+  logging.info('OneAgent SDK successfully instantiated.')
 
 # create FastAPI app
 app =FastAPI(title="Notification Service") 
