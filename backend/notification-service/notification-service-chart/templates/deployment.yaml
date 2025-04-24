@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "notification-service.fullname" . }}
+  labels:
+    {{- include "notification-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "notification-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "notification-service.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "notification-service.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      initContainers:
+      {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+        - name: install-oneagent
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
+          env:
+            - name: DYNATRACE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-dynatrace-oneagent
+                  key: api-url
+            - name: DYNATRACE_PAAS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-dynatrace-oneagent
+                  key: paas-installer-download-token
+            - name: DYNATRACE_ONEAGENT_OPTIONS
+              value: flavor=multidistro&include=sdk
+            - name: DYNATRACE_INSTALL_DIR
+              value: /opt/dynatrace/oneagent
+          volumeMounts:
+            - mountPath: /opt/dynatrace/oneagent
+              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512Mi
+        {{- end }} 
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "quay.io/ukhomeofficedigital/dsa-re-notification-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8000
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 30
+          #   timeoutSeconds: 10
+          #   failureThreshold: 3
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8000
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 30
+          #   timeoutSeconds: 10
+          #   failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: KAFKA_SERVERS
+              value: {{ .Values.kafka.bootstrapServers }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.kafka.topic }}
+            - name: KAFKA_GROUP_ID
+              value: {{ .Values.kafka.groupId }}
+            - name: KAFKA_CERT_PATH
+              value: {{ .Values.kafka.certPath }}
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+            - name: LD_PRELOAD
+              value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+          {{- end }}
+          volumeMounts:
+          {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              mountPath: /opt/dynatrace/oneagent
+          {{- end }}
+            - name: kafka-certs
+              mountPath: {{ .Values.kafka.certPath }}
+              readOnly: true
+      volumes:
+      {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
+        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+          emptyDir: {}
+      {{- end }}
+        - name: kafka-certs
+          secret:
+            secretName: kafka-mtls-certs
+        - name: certs
+          emptyDir: {}
+        - name: secrets
+          emptyDir: {}
+        - name: bundle
+          configMap:
+            name: bundle
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
