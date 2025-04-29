@@ -120,15 +120,14 @@ These charts are structured with:
 - **Environment-specific values files** (e.g., `values-dev.yaml`)
 
 For development deployments, we typically deploy into the `dsa-re-dev` namespace using Helm.  
-Example command to install or upgrade a service:
+Example command to deploy registration-service:
 
 ```bash
-helm upgrade --install registration-service ./helm/registration-service \
-  --namespace dsa-re-dev \
-  -f helm/registration-service/values-dev.yaml
+cd registration-service/registration-service-chart
+helm deploy registration-service . --values=values-dev.yaml --namespace dsa-re-dev
 ```
 
-Make sure you have authenticated access to the Kubernetes cluster and have the necessary secrets (e.g., Kafka certificates, Postgres credentials) already set up before deploying.
+Make sure you have authenticated access to the Kubernetes cluster and have the necessary secrets (e.g., Kafka certificates, Postgres credentials) already set up before deploying. Refer to [Technical Onboarding Guide](https://confluence.dsa.homeoffice.gov.uk/display/SPS/Dynatrace+-+Technical+Onboarding+Guide) for access requirements.
 
 ---
 
