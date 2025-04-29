@@ -1,72 +1,201 @@
 # DSA SRE Showcase Services Monorepo
 
-This monorepo contains the Showcase Services application, designed to mimic a business service to act as a playground for testing and demonstrating various dynatrace configurations for various application stacks and builds. It consists of several microservices that work together to simulate a real-world business workflow - "Rent a Unicorn."
+This monorepo contains the **Showcase Services** application, a playground environment built to simulate a real-world business service and demonstrate various **Dynatrace monitoring**, **distributed tracing**, and **application observability** implementations across different tech stacks.
+
+The system is designed around a fictional scenario, "**Rent a Unicorn**," where users can register, log in, and trigger events — creating consistent, traceable workflows across multiple services built with different technology stacks. This architecture enables testing, validation, and demonstration of required Dynatrace configurations for a variety of product types, reflecting real-world environments where diverse applications and technologies should be monitored seamlessly.
+
+---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Architecture](#architecture)
 - [Microservices](#microservices)
 - [Technologies](#technologies)
+- [Kafka Topics and Messaging](#kafka-topics-and-messaging)
+- [CronJob - Simulated User Login](#cronjob---simulated-user-login)
 - [Setup](#setup)
-- [Running the Application](#running-the-application)
+- [Deploying](#deploying-to-kubernetes)
+- [Accessing the Services](#accessing-the-deployed-application)
 - [Contributing](#contributing)
 - [License](#license)
 
+---
+
 ## Overview
 
-The Showcase Services monorepo contains multiple microservices that simulate different functionalities, such as user registration, catalog browsing, booking, and notifications. These services are built to help developers test distributed tracing, performance monitoring, and metric collection with Dynatrace across different technologies.
+The Showcase Services project includes multiple microservices communicating via **REST APIs** and **Kafka messaging**.  
+It aims to provide a lightweight but realistic system to:
+
+- Test **distributed tracing** with Dynatrace.
+- Explore **metrics** and **logs** collection across services.
+- Validate **secure service-to-service communication** (mTLS with Kafka).
+- Showcase **best practices** for observability in Kubernetes environments.
+
+All services are containerized, deployed into **Kubernetes** clusters using **Helm charts**, and monitored via **Dynatrace ActiveGate** and **OneAgent**.
+
+---
+
+## Architecture
+
+```
+User
+ ↓
+Frontend (Javascript/React)
+ ↓ (REST API)
+Registration Service (Java/Spring Boot)
+ ↓ (Kafka - mTLS secured)
+userLogin Topic (AWS MSK)
+ ↓
+Notification Service (Python FastAPI)
+```
+
+- A **Kubernetes CronJob** named ***trigger-login*** regularly triggers simulated user login (every approx 10 mins) activity to maintain traffic through the system for monitoring and tracing purposes, ensuring consistency in data being sent to Dynatrace SAAS.
+- **RDS PostgreSQL** database instance is used by the Registration Service to manage user data in the *users* table.
+- **Amazon MSK (Kafka)** is used for inter-service messaging.
+
+---
 
 ## Microservices
 
-This project currently includes the following microservices:
+| Service | Stack | Description |
+| :--- | :--- | :--- |
+| **Frontend Service** | React | User-facing web application. Handles user login and registration via APIs to backend services. | Conditional routing based on user roles of *admin* or *customer*. |
+| **Registration Service** | Spring Boot (Java) | Backend service for user registration, login and authentication. Publishes Kafka messages on user login using kafka-consumer viar the [RegistrationProducer](/backend/registration-service/src/main/java/com_example_registration_service/RegistrationProducer.java) class |
+| **Notification Service** | FastAPI (Python) | Kafka consumer service that processes login events published by the Registration Service. |
 
-- **Registration Service (Spring Boot)**: Handles user registration and authentication.
-- **Frontend Service (React)**: A user interface that interacts with the backend services.
-- **Other Services**: Additional microservices like catalog, booking, and notification to be added in the near future
+Each microservice resides in its own subdirectory within the monorepo.
 
-Each microservice resides in its own directory within this monorepo.
+---
 
 ## Technologies
 
-The project makes use of multiple technologies across different microservices:
+- **Java (Spring Boot)**: Backend service for registration and authentication.
+- **React**: Frontend UI for users.
+- **Python (FastAPI)**: Lightweight Kafka consumer for notification processing.
+- **PostgreSQL**: Persistent user database (AWS RDS).
+- **Kafka (Amazon MSK)**: Event-driven messaging platform.
+- **Kubernetes**: Deployment and orchestration.
+- **Helm**: Kubernetes package management.
+- **Dynatrace**: Monitoring, metrics, distributed tracing (ActiveGate + OneAgent).
+- **mTLS**: Secure Kafka communication between services.
 
-- **Java (Spring Boot)**: For backend services like registration.
-- **React**: For the frontend web interface.
-- **PostgreSQL**: As the database for backend services.
-- **Other Technologies**: More technologies to be added as the project evolves.
+---
+
+## Kafka Topics and Messaging
+
+- **Topics**:
+  - `userLogin`: Published by the Registration Service when users successfully log in. Consumed by the Notification Service.
+
+- **mTLS Authentication**:
+  - Kafka client certificates are generated, stored in a Kubernetes **PersistentVolumeClaim (PVC)**, and mounted into the service pods that interact with Kafka.
+
+- **Kafka Tools Pod**:
+  - A special tools pod is available to run Kafka client commands using mTLS certificates for validation and testing. Documentation on using the pod [here](https://confluence.dsa.homeoffice.gov.uk/display/SPS/How+to+diagnose+network+connectivity+within+the+Kubernetes+cluster).
+
+---
+
+## CronJob - Simulated User Login
+
+- A **Kubernetes CronJob** is deployed to regularly simulate a user login by calling the Registration Service API.
+- This ensures that consistent Kafka traffic is generated for distributed tracing and metrics collection, even without manual user interaction.
+
+---
 
 ## Setup
 
-### Clone the Monorepo with SSH:
+### Clone the Monorepo
 
 ```bash
 git clone git@github.com:UKHomeOffice/dsa-re-showcase.git
+cd dsa-re-showcase
 ```
 
-### Install Dependencies for Each Microservice
+## Deploying to Kubernetes
 
-Each microservice has its own set of dependencies and setup instructions. Follow the individual README files within each microservice directory to set them up:
+Each microservice (Frontend Service, Registration Service, Notification Service) has its own dedicated Helm chart.  
+These charts are structured with:
 
-- **Registration Service**: Located in `backend/registration-service/`
-- **Frontend Service**: Located in `frontend/frontend-service/`
+- **Global configuration** (common settings, secrets, networking templates)
+- **Environment-specific values files** (e.g., `values-dev.yaml`)
 
-## Running the Application
+For development deployments, we typically deploy into the `dsa-re-dev` namespace using Helm.  
+Example command to install or upgrade a service:
 
-1. **Start the Backend Services**: Navigate to each microservice directory (e.g., `registration-service/`) and follow the instructions in their respective README files to start the services.
+```bash
+helm upgrade --install registration-service ./helm/registration-service \
+  --namespace dsa-re-dev \
+  -f helm/registration-service/values-dev.yaml
+```
 
-2. **Start the Frontend Service**: Similarly, navigate to `frontend-service/` and follow its README instructions to start the frontend.
+Make sure you have authenticated access to the Kubernetes cluster and have the necessary secrets (e.g., Kafka certificates, Postgres credentials) already set up before deploying.
 
-3. **Access the Application**: Once all services are up and running, you can access the frontend via `http://localhost:3000` (or another port depending on your configuration).
+---
+
+## Accessing the Deployed Application
+
+- The **Frontend Service** provides the only public-facing UI.
+- Once deployed, it can be accessed at:
+
+```text
+http://frontend-service.dev.dsa-re-notprod.homeoffice.gov.uk/
+```
+
+- The **Registration Service** and **Notification Service** are backend services and are not publicly exposed. They communicate internally within the Kubernetes cluster via REST and Kafka.
+
+To **view the logs** of any deployed service:
+
+1. List the pods in the namespace:
+
+```bash
+kubectl get pods -n dsa-re-dev
+```
+
+2. Stream the logs of a specific pod:
+
+```bash
+kubectl logs <pod-name> -n dsa-re-dev -f
+```
+
+For example, to view live logs of the Registration Service pod:
+
+```bash
+kubectl logs registration-service-<pod-suffix> -n dsa-re-dev -f
+```
+
+Replace `<pod-suffix>` with the actual pod identifier.
+
+This is useful for troubleshooting and observing service activity, including Kafka message production and consumption.
+
+---
 
 ## Contributing
-
-Contributions are welcome! Please follow these steps:
+  
+The showcase-services are currently in active development and for contricuting, pleease follow these steps:
 
 1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes and commit them (`git commit -m 'Add a new feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a Pull Request.
+
+2. Create a new branch:
+
+    ```bash
+    git checkout -b feature/YourFeature
+    ```
+
+3. Make your changes and commit them:
+
+    ```bash
+    git commit -m "Add new feature"
+    ```
+
+4. Push your branch:
+
+    ```bash
+    git push origin feature/YourFeature
+    ```
+
+5. Open a Pull Request against the `main` branch.
+
+---
 
 ## License
 
