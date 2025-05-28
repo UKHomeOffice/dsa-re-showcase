@@ -8,17 +8,20 @@ The system is designed around a fictional scenario, "**Rent a Unicorn**," where 
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Microservices](#microservices)
-- [Technologies](#technologies)
-- [Kafka Topics and Messaging](#kafka-topics-and-messaging)
-- [CronJob - Simulated User Login](#cronjob---simulated-user-login)
-- [Setup](#setup)
-- [Deploying](#deploying-to-kubernetes)
-- [Accessing the Services](#accessing-the-deployed-application)
-- [Contributing](#contributing)
-- [License](#license)
+- [DSA SRE Showcase Services Monorepo](#dsa-sre-showcase-services-monorepo)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Architecture](#architecture)
+  - [Microservices](#microservices)
+  - [Technologies](#technologies)
+  - [Kafka Topics and Messaging](#kafka-topics-and-messaging)
+  - [CronJob - Simulated User Login](#cronjob---simulated-user-login)
+  - [Setup](#setup)
+    - [Clone the Monorepo](#clone-the-monorepo)
+  - [Deploying to Kubernetes](#deploying-to-kubernetes)
+  - [Accessing the Deployed Application](#accessing-the-deployed-application)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ---
 
@@ -124,7 +127,7 @@ Example command to deploy registration-service:
 
 ```bash
 cd registration-service/registration-service-chart
-helm deploy registration-service . --values=values-dev.yaml --namespace dsa-re-dev
+helm upgrade registration-service . --values=values-dev.yaml --namespace dsa-re-dev
 ```
 
 Make sure you have authenticated access to the Kubernetes cluster and have the necessary secrets (e.g., Kafka certificates, Postgres credentials) already set up before deploying. Refer to [Technical Onboarding Guide](https://confluence.dsa.homeoffice.gov.uk/display/SPS/Dynatrace+-+Technical+Onboarding+Guide) for access requirements.
