@@ -4,11 +4,13 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 import os
 
+# Set the CA certificate path via an environment variable
+os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
+
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(
     endpoint=os.getenv("DYNATRACE_API_URL"),
     headers={"Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}"},
-    cert_path = "/app/acp_root_ca.crt"
 )
 
 # Set up the MeterProvider with the exporter
