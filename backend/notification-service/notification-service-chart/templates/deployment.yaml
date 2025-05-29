@@ -86,13 +86,13 @@ spec:
             - name: DYNATRACE_API_URL
               valueFrom:
                 secretKeyRef:
-                  name: notification-service-dynatrace-oneagent
+                  name: registration-service-dynatrace-metrics-ingest
                   key: api-url
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: notification-service-dynatrace-oneagent
-                  key: paas-installer-download-token
+                  name: registration-service-dynatrace-metrics-ingest
+                  key: token
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}
             - name: KAFKA_TOPIC
