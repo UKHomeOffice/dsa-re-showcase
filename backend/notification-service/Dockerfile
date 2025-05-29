@@ -7,6 +7,8 @@ ARG UID=1000
 
 USER root
 
+RUN addgroup -g "$UID" "$USER" && adduser -u "$UID" -G "$USER" -D "$USER"
+
 COPY . .
 
 ADD https://raw.githubusercontent.com/UKHomeOffice/acp-ca/master/ca.pem /app/acp_root_ca.crt
