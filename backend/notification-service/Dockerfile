@@ -7,7 +7,7 @@ ARG UID=1000
 
 USER root
 
-COPY backend/notification-service .
+COPY . .
 
 ADD https://raw.githubusercontent.com/UKHomeOffice/acp-ca/master/ca.pem /app/acp_root_ca.crt
 
