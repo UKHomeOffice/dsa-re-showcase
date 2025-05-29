@@ -4,7 +4,7 @@ import asyncio
 from datetime import datetime
 from kafka import KafkaConsumer
 from ssl import create_default_context
-from main import login_event_metric
+from custom_metric import login_event_metric
 import os
 
 logger = logging.getLogger(__name__)
