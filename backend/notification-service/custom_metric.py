@@ -12,7 +12,7 @@ exporter = OTLPMetricExporter(
     endpoint=os.getenv("DYNATRACE_API_URL"),
     headers={
         "Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}",
-        "Content-Type": "application/json"    
+        "Content-Type": "application/x-protobuf"  
     },
 )
 
