@@ -7,6 +7,9 @@ from ssl import create_default_context
 import os
 
 logger = logging.getLogger(__name__)
+
+# Custom metrics: global counter for login events
+login_event_counter = 0
     
 async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
   """Start consuming login events from kafka"""
@@ -55,7 +58,7 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                 sdk.add_custom_request_attribute('kafka.offset', message.offset)
                 sdk.add_custom_request_attribute('kafka.key', str(message.key))
 
-                # formatting:
+                # Formatting and processing the message:
                 parts = raw.split(", ")
                 if len(parts) == 3 and "User logged in: " in parts[0]:
                     name = parts[0].split("User logged in: ")[1].strip()
@@ -65,6 +68,7 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     logging.info(f"Login detected: {name} ({email}) at {timestamp}")
                     logging.info(f"Notification sent to {email}")
 
+                    # Add the login event to recent_logins
                     login_event = {
                         "name": name,
                         "email": email,
@@ -73,6 +77,11 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     recent_logins.insert(0, login_event)
                     if len(recent_logins) > max_logins:
                         recent_logins = recent_logins[:max_logins]
+                    
+                    # Increment the login event counter
+                        global login_event_counter
+                        login_event_counter += 1
+                        logging.info(f"Total login events processed: {login_event_counter}")
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 
