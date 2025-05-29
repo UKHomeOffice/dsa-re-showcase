@@ -10,7 +10,10 @@ os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(
     endpoint=os.getenv("DYNATRACE_API_URL"),
-    headers={"Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}"},
+    headers={
+        "Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}",
+        "Content-Type": "application/json"    
+    },
 )
 
 # Set up the MeterProvider with the exporter

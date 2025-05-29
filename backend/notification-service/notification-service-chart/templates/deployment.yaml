@@ -87,7 +87,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: registration-service-dynatrace-metrics-ingest
-                  key: api-url
+                  key: api_url
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
