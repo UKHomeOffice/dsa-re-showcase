@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11-slim
+FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.12-alpine3.21
 
 WORKDIR /app
 
@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
