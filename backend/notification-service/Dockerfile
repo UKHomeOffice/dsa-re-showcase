@@ -2,25 +2,18 @@ FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.12-alpine3.21
 
 WORKDIR /app
 
-ARG USER=dynatrace
-ARG UID=1000
-
-USER root
-
-RUN addgroup -g "$UID" "$USER" && adduser -u "$UID" -G "$USER" -D "$USER"
-
-COPY . .
-
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 ADD https://raw.githubusercontent.com/UKHomeOffice/acp-ca/master/ca.pem /app/acp_root_ca.crt
 
-RUN chown -R "$USER":"$USER" /app
-RUN chmod 755 /app
+# Change permissions for the CA certificate
+RUN chmod 644 /app/acp_root_ca.crt
 
-USER $UID
+# Copy the application code
+COPY . .
 
-WORKDIR /app
-
-RUN pip install --no-cache-dir -r requirements.txt
+# Change permissions for the /app directory
+RUN chmod -R 755 /app
 
 EXPOSE 8000
 
