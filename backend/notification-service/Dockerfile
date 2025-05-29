@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+ADD https://raw.githubusercontent.com/UKHomeOffice/acp-ca/master/ca.pem /app/acp_root_ca.crt
 
 COPY . .
 
