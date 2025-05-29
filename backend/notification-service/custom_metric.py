@@ -8,7 +8,7 @@ import os
 exporter = OTLPMetricExporter(
     endpoint=os.getenv("DYNATRACE_API_URL"),
     headers={"Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}"},
-    verify_tls = "/app/acp_root_ca.crt"
+    cert_path = "/app/acp_root_ca.crt"
 )
 
 # Set up the MeterProvider with the exporter
