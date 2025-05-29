@@ -3,3 +3,6 @@ uvicorn
 kafka-python
 python-dotenv
 oneagent-sdk
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp

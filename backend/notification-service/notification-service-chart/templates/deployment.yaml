@@ -83,6 +83,16 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+            - name: DYNATRACE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-dynatrace-oneagent
+                  key: api-url
+            - name: DYNATRACE_PAAS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-dynatrace-oneagent
+                  key: paas-installer-download-token
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}
             - name: KAFKA_TOPIC
