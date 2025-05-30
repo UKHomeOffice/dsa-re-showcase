@@ -4,10 +4,6 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 import os
 
-# Set the CA certificate path via an environment variable
-os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
-# Global variable to track the total number of login events
-total_login_events = 0
 
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(
@@ -26,7 +22,7 @@ metrics.set_meter_provider(provider)
 # Get a meter instance for this module
 meter = metrics.get_meter("notification-service", "0.1.2")
 
-# Create a counter for login events (delta metric)
+# Create a counter for login events
 login_event_counter = meter.create_up_down_counter(
     name="login_event_counter",
     description="Counts the number of login events processed",
