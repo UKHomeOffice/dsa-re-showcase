@@ -76,10 +76,11 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     if len(recent_logins) > max_logins:
                         recent_logins = recent_logins[:max_logins]
 
-                    # Increment the counter metric
-                    login_event_counter.add(1, {"event_type": "login"})
+                    # Increment the total login events
+                    global total_login_events
+                    total_login_events += 1
 
-                    logging.info("Custom metric 'login_event_counter' incremented by 1.")
+                    logging.info(f"Total login events processed: {total_login_events}")
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 

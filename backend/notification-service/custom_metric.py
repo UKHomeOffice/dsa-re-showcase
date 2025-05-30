@@ -26,9 +26,13 @@ metrics.set_meter_provider(provider)
 # Get a meter instance for this module
 meter = metrics.get_meter("notification-service", "0.1.2")
 
-# Create a counter for login events (delta metric)
-login_event_counter = meter.create_counter(
-    name="login_event_delta",
-    description="Counts the delta of login events processed",
-    unit="1"
+# Create an observable gauge for total login events
+def observe_login_events(callback_options):
+    return [total_login_events]
+
+login_event_total_metric = meter.create_observable_gauge(
+    name="login_event_total",
+    description="Tracks the total number of login events processed",
+    unit="1",
+    callbacks=[observe_login_events]
 )
