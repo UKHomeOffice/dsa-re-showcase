@@ -4,6 +4,8 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 import os
 
+# Set the CA certificate path via an environment variable
+os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(

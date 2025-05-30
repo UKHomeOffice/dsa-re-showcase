@@ -83,11 +83,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: DYNATRACE_API_URL
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
-                  key: api_url
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
