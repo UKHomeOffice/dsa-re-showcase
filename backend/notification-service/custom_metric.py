@@ -6,6 +6,8 @@ import os
 
 # Set the CA certificate path via an environment variable
 os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
+# Global variable to track the total number of login events
+total_login_events = 0
 
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(
@@ -25,8 +27,9 @@ metrics.set_meter_provider(provider)
 meter = metrics.get_meter(__name__)
 
 # Create a custom counter metric for login events
-login_event_metric = meter.create_counter(
+login_event_metric = meter.create_observable_counter(
     name="login_event_counter",
     description="Counts the number of login events processed",
     unit="1",
+    callback=lambda observer: observer.observe(total_login_events, {"event_type": "login"})
 )

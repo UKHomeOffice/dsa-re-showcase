@@ -4,7 +4,7 @@ import asyncio
 from datetime import datetime
 from kafka import KafkaConsumer
 from ssl import create_default_context
-from custom_metric import login_event_metric
+from custom_metric import total_login_events
 import os
 
 logger = logging.getLogger(__name__)
@@ -76,9 +76,10 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     if len(recent_logins) > max_logins:
                         recent_logins = recent_logins[:max_logins]
                     
-                    # Increment the login event counter
-                    login_event_metric.add(1, {"event_type": "login"})
-                    logging.info("Custom metric 'login_event_counter' incremented by 1.")
+                    # Increment the total login events
+                    global total_login_events
+                    total_login_events += 1
+                    logging.info(f"Total login events processed: {total_login_events}")
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 
