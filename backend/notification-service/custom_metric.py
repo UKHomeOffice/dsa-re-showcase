@@ -9,7 +9,7 @@ os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 
 # Initialize OpenTelemetry Metric Exporter
 exporter = OTLPMetricExporter(
-    endpoint="https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp",
+    endpoint="https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1/metrics",
     headers={
         "Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}",
         "Content-Type": "application/x-protobuf"
