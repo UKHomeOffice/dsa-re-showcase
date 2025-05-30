@@ -2,7 +2,7 @@ from opentelemetry import metrics
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.metrics import Measurement
+from opentelemetry.sdk.metrics._internal import Measurement
 import os
 
 # Set the CA certificate path via an environment variable
