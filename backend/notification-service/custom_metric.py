@@ -26,10 +26,13 @@ metrics.set_meter_provider(provider)
 # Get a meter instance for this module
 meter = metrics.get_meter(__name__)
 
-# Create a custom counter metric for login events
+# Create a custom observable gauge metric for login events
+def observe_login_events(observer):
+    observer.observe(total_login_events, {"event_type": "login"})
+
 login_event_metric = meter.create_observable_gauge(
     name="login_event_counter",
     description="Tracks the total number of login events processed",
     unit="1",
-    callback=lambda observer: observer.observe(total_login_events, {"event_type": "login"})
+    callbacks=[observe_login_events]  # Use a list of callbacks
 )
