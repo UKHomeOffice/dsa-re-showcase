@@ -16,6 +16,7 @@ The system is designed around a fictional scenario, "**Rent a Unicorn**," where 
   - [Technologies](#technologies)
   - [Kafka Topics and Messaging](#kafka-topics-and-messaging)
   - [CronJob - Simulated User Login](#cronjob---simulated-user-login)
+  - [Custom Metric - Counter](#custom-metric---counter)
   - [Setup](#setup)
     - [Clone the Monorepo](#clone-the-monorepo)
   - [Deploying to Kubernetes](#deploying-to-kubernetes)
@@ -103,6 +104,12 @@ Each microservice resides in its own subdirectory within the monorepo.
 - A **Kubernetes CronJob** is deployed to regularly simulate a user login by calling the Registration Service API.
 - This ensures that consistent Kafka traffic is generated for distributed tracing and metrics collection, even without manual user interaction.
 
+---
+
+## Custom Metric - Counter
+
+- A **Counter** for the number of logins show how to publish custom metrics from the python code to any backend by OpenTelemetry (OTLP).
+- The notification-service custom_metric.py provide the set up module and the kafka_consumer.py include an increment counter trigger which data you can fetch in your backend monitoring tool.
 ---
 
 ## Setup

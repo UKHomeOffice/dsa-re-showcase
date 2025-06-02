@@ -23,6 +23,7 @@ podSecurityContext: {}
 service:
   type: ClusterIP
   port: 8080
+  targetPort: 8000
 
 ingress:
   enabled: false
