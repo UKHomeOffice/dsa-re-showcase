@@ -6,8 +6,12 @@ from kafka import KafkaConsumer
 from ssl import create_default_context
 from custom_metric import login_event_counter
 import os
+from db import initialize_db
 
 logger = logging.getLogger(__name__)
+
+# Initialize the database
+initialize_db()
 
 async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
   """Start consuming login events from kafka"""
