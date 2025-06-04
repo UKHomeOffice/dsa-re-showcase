@@ -31,13 +31,15 @@ spec:
             secretKeyRef:
               name: postgresql-secret
               key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/db
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
-          name: postgres-storage
+          name: pgdata
         securityContext:
           runAsUser: 999
           runAsGroup: 999
       volumes:
-      - name: postgres-storage
+      - name: pgdata
         persistentVolumeClaim:
           claimName: postgres-pvc

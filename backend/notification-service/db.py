@@ -37,17 +37,17 @@ def initialize_db():
     cursor.close()
     conn.close()
 
-from db import get_db_connection
-
-try:
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM login_counts;")
-    rows = cursor.fetchall()
-    print("Database is working. Rows in login_counts table:")
-    for row in rows:
-        print(row)
-    cursor.close()
-    conn.close()
-except Exception as e:
-    print(f"Error connecting to the database: {e}")
+def test_db_connection():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM login_counts;")
+        rows = cursor.fetchall()
+        print("Database connection successful. Rows in login_counts table:")
+        for row in rows:
+            print(row)
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        raise
