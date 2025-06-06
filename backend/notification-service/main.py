@@ -103,8 +103,6 @@ async def startup_event():
       recent_logins=recent_logins, 
       max_logins=MAX_STORED_LOGINS, 
       sdk=sdk,
-      session_timeout_ms=60000,
-      heartbeat_interval_ms=20000
       )
   )
 

@@ -6,24 +6,8 @@ from kafka import KafkaConsumer
 from ssl import create_default_context
 from custom_metric import login_event_counter
 import os
-from db import initialize_db, test_db_connection
 
 logger = logging.getLogger(__name__)
-
-# Initialize the database
-try:
-    initialize_db()
-    logging.info("Database initialized successfully.")
-except Exception as e:
-    logging.error(f"Error initializing the database: {e}")
-    raise
-
-# Test the database connection
-try:
-    test_db_connection()
-except Exception as e:
-    logging.error(f"Database connection test failed: {e}")
-    raise
 
 async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
   """Start consuming login events from kafka"""
@@ -51,7 +35,8 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
         group_id=group_id,
         security_protocol='SSL',
         ssl_context=ssl_context,
-        session_timeout_ms=30000,
+        session_timeout_ms=60000,
+        heartbeat_interval_ms=20000
       )
       
       logger.info("Kafka consumer initialised, waiting for messages...")
