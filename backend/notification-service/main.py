@@ -96,7 +96,16 @@ def simulate_login(email: str = "user@example.com"):
 async def startup_event():
   """Start kafka consumer on startup"""
   asyncio.create_task(
-    start_consumer(bootstrap_servers=KAFKA_SERVERS, topic=KAFKA_TOPIC, group_id=KAFKA_GROUP_ID, recent_logins=recent_logins, max_logins=MAX_STORED_LOGINS, sdk=sdk)
+    start_consumer(
+      bootstrap_servers=KAFKA_SERVERS, 
+      topic=KAFKA_TOPIC, 
+      group_id=KAFKA_GROUP_ID, 
+      recent_logins=recent_logins, 
+      max_logins=MAX_STORED_LOGINS, 
+      sdk=sdk,
+      session_timeout_ms=60000,
+      heartbeat_interval_ms=20000
+      )
   )
 
 if __name__ == "__main__":
