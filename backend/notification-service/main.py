@@ -16,23 +16,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize the database
-try:
-    logging.info("Starting database initialization...")
-    initialize_db()
-    logging.info("Database initialized successfully.")
-except Exception as e:
-    logging.error(f"Error initializing the database: {e}")
-    raise
+# # Initialize the database
+# try:
+#     logging.info("Starting database initialization...")
+#     initialize_db()
+#     logging.info("Database initialized successfully.")
+# except Exception as e:
+#     logging.error(f"Error initializing the database: {e}")
+#     raise
 
-# Test the database connection
-try:
-    logging.info("Starting database connection test...")
-    test_db_connection()
-    logging.info("Database connection test successful.")
-except Exception as e:
-    logging.error(f"Database connection test failed: {e}")
-    raise
+# # Test the database connection
+# try:
+#     logging.info("Starting database connection test...")
+#     test_db_connection()
+#     logging.info("Database connection test successful.")
+# except Exception as e:
+#     logging.error(f"Database connection test failed: {e}")
+#     raise
 
 oneagent_init = oneagent.initialize()
 if not oneagent_init:
