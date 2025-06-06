@@ -88,12 +88,9 @@ spec:
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: postgresql-secret
-                  key: POSTGRES_DB
+              value: "db_logins"
             - name: POSTGRES_USER
-              value: postgres
+              value: "postgres"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
