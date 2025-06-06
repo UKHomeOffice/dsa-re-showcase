@@ -7,17 +7,20 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: notification-service-db
+      app.kubernetes.io/instance: notification-service-db
+      app.kubernetes.io/name: notification-service-db
+  ingress:
   template:
     metadata:
       labels:
-        app: notification-service-db
+        app.kubernetes.io/instance: notification-service-db
+        app.kubernetes.io/name: notification-service-db
     spec:
       securityContext:
         fsGroup: 999
       containers:
       - name: postgres
-        image: quay.io/ukhomeofficedigital/dsa-re-notification-service-db
+        image: quay.io/ukhomeofficedigital/dsa-re-notification-service-db:latest
         ports:
         - containerPort: 5432
         env:

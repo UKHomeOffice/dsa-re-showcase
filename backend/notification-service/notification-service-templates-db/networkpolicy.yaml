@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-access
+  namespace: dsa-re-dev
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: notification-service-db
+      app.kubernetes.io/name: notification-service-db
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/instance: notification-service
+            app.kubernetes.io/name: notification-service
+      ports:
+      - protocol: TCP
+        port: 5432
+  egress:
+    - {}
+  policyTypes:
+  - Ingress
+  - Egress
