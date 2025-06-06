@@ -6,8 +6,6 @@ import asyncio
 from kafka_consumer import start_consumer
 import oneagent
 import oneagent.sdk
-from db import initialize_db, test_db_connection
-
 
 # Configure logging
 logging.basicConfig(
@@ -15,24 +13,6 @@ logging.basicConfig(
   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# # Initialize the database
-# try:
-#     logging.info("Starting database initialization...")
-#     initialize_db()
-#     logging.info("Database initialized successfully.")
-# except Exception as e:
-#     logging.error(f"Error initializing the database: {e}")
-#     raise
-
-# # Test the database connection
-# try:
-#     logging.info("Starting database connection test...")
-#     test_db_connection()
-#     logging.info("Database connection test successful.")
-# except Exception as e:
-#     logging.error(f"Database connection test failed: {e}")
-#     raise
 
 oneagent_init = oneagent.initialize()
 if not oneagent_init:
