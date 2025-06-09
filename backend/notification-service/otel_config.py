@@ -33,12 +33,5 @@ metric_reader = PeriodicExportingMetricReader(metric_exporter)
 meter_provider = MeterProvider(metric_readers=[metric_reader])
 metrics.set_meter_provider(meter_provider)
 
-# Set up the TracerProvider with the Trace Exporter
-tracer_provider = TracerProvider()
-span_processor = BatchSpanProcessor(trace_exporter)
-tracer_provider.add_span_processor(span_processor)
-trace.set_tracer_provider(tracer_provider)
-
-# Get reusable tracer and meter instances
-tracer = trace.get_tracer("notification-service")
+# Get a reusable meter instance
 meter = metrics.get_meter("notification-service")
