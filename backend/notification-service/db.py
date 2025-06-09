@@ -1,7 +1,7 @@
 import psycopg2
 import os
 from otel_config import meter
-from opentelemetry.sdk.metrics import Observation
+from opentelemetry.sdk.metrics._internal.observation import Observation
 
 # Database connection details
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
