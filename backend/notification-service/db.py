@@ -51,3 +51,21 @@ def test_db_connection():
     except Exception as e:
         print(f"Error connecting to the database: {e}")
         raise
+
+def increment_login_count():
+    """Increment the total_count in the login_counts table."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE login_counts
+            SET total_count = total_count + 1
+            WHERE id = 1;
+        """)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("Successfully incremented total_count in the database.")
+    except Exception as e:
+        print(f"Error incrementing total_count in the database: {e}")
+        raise
