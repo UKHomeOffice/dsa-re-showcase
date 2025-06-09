@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime
 from kafka import KafkaConsumer
 from ssl import create_default_context
+from db import increment_login_count
 from custom_metric import login_event_counter
 import os
 
@@ -40,6 +41,8 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
       )
       
       logger.info("Kafka consumer initialised, waiting for messages...")
+      # Increment the total_count in the database
+      increment_login_count()
       
       # Process messages
       for message in consumer:
@@ -80,6 +83,9 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     # Increment the counter metric
                     login_event_counter.add(1, {"event_type": "login"})
                     logging.info("Custom metric 'login_event_counter' incremented by 1.")
+
+                    # Increment the total_count in the database
+                    increment_login_count()
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 

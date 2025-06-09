@@ -34,12 +34,6 @@ except Exception as e:
     logging.error(f"Database connection test failed: {e}")
     raise
 
-async def update_db_counter_periodically():
-    """Periodically update the db_login_event_counter."""
-    while True:
-        update_db_login_event_counter()
-        await asyncio.sleep(30)  # Update every 30 seconds
-
 oneagent_init = oneagent.initialize()
 if not oneagent_init:
   logging.warning('Error initializing OneAgent SDK.')
@@ -111,8 +105,6 @@ async def startup_event():
       sdk=sdk,
       )
   )
-  # Start the periodic task to update the db_login_event_counter
-  asyncio.create_task(update_db_counter_periodically())
 
 if __name__ == "__main__":
   import uvicorn
