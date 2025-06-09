@@ -1,6 +1,6 @@
 import psycopg2
 import os
-from otel_config import meter, tracer
+from otel_config import meter
 
 # Database connection details
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
