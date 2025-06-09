@@ -21,7 +21,7 @@ metric_exporter = OTLPMetricExporter(
 
 # Initialize OpenTelemetry Trace Exporter
 trace_exporter = OTLPSpanExporter(
-    endpoint="https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1/metrics",
+    endpoint="https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1/traces",
     headers={
         "Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}",
         "Content-Type": "application/x-protobuf"
