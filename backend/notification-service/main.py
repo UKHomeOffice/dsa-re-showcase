@@ -6,7 +6,7 @@ import asyncio
 from kafka_consumer import start_consumer
 import oneagent
 import oneagent.sdk
-from db import initialize_db, test_db_connection
+from db import initialize_db, test_db_connection, update_db_login_event_counter
 
 
 # Configure logging
@@ -33,6 +33,12 @@ try:
 except Exception as e:
     logging.error(f"Database connection test failed: {e}")
     raise
+
+async def update_db_counter_periodically():
+    """Periodically update the db_login_event_counter."""
+    while True:
+        update_db_login_event_counter()
+        await asyncio.sleep(30)  # Update every 30 seconds
 
 oneagent_init = oneagent.initialize()
 if not oneagent_init:
@@ -105,6 +111,8 @@ async def startup_event():
       sdk=sdk,
       )
   )
+  # Start the periodic task to update the db_login_event_counter
+  asyncio.create_task(update_db_counter_periodically())
 
 if __name__ == "__main__":
   import uvicorn

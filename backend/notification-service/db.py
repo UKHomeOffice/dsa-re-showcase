@@ -60,24 +60,23 @@ db_login_event_counter = meter.create_up_down_counter(
     unit="1"
 )
 
-# Increment login count with metrics
-def increment_login_count():
-    """Increment the total_count in the login_counts table and update metrics."""
+# Fetch the total_count from the database and update the counter
+def update_db_login_event_counter():
+    """Fetch the total_count from the database and update the counter."""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE login_counts
-            SET total_count = total_count + 1
-            WHERE id = 1;
-        """)
-        conn.commit()
+        cursor.execute("SELECT total_count FROM login_counts WHERE id = 1;")
+        result = cursor.fetchone()
         cursor.close()
         conn.close()
 
-        # Increment the OpenTelemetry UpDownCounter
-        db_login_event_counter.add(1, {"db.table": "login_counts", "operation": "increment"})
-        print("Successfully incremented total_count in the database.")
+        if result:
+            total_count = result[0]
+            # Update the OpenTelemetry counter
+            db_login_event_counter.add(total_count, {"db.table": "login_counts", "operation": "fetch"})
+            print(f"Updated db_login_event_counter to {total_count}.")
+        else:
+            print("No total_count found in the database.")
     except Exception as e:
-        print(f"Error incrementing total_count in the database: {e}")
-        raise
+        print(f"Error updating db_login_event_counter: {e}")

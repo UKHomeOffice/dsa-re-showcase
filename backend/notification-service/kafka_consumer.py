@@ -81,9 +81,6 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     # Increment the counter metric
                     login_event_counter.add(1, {"event_type": "login"})
                     logging.info("Custom metric 'login_event_counter' incremented by 1.")
-
-                    # Increment the total_count in the database
-                    increment_login_count()
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 
