@@ -5,7 +5,6 @@ from datetime import datetime
 from kafka import KafkaConsumer
 from ssl import create_default_context
 from custom_metric import login_event_counter
-from db import increment_login_count
 import os
 
 logger = logging.getLogger(__name__)
