@@ -6,7 +6,7 @@ import asyncio
 from kafka_consumer import start_consumer
 import oneagent
 import oneagent.sdk
-from db import initialize_db, test_db_connection, update_db_login_event_counter
+from db import initialize_db, test_db_connection
 
 
 # Configure logging
