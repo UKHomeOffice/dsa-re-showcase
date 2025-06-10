@@ -1,6 +1,7 @@
 import psycopg2
 import os
 from otel_config import meter
+from opentelemetry.metrics import Observation
 
 
 # Database connection details
@@ -97,13 +98,13 @@ def get_login_total_count(options):
         if result:
             total_count = result[0]
             print(f"[METRIC] Reporting total_count = {total_count}")
-            return [Observation(value=total_count, attributes={"db.table": "login_counts"})]
+            yield Observation(value=total_count, attributes={"db.table": "login_counts"})
         else:
             print("No total_count found in the database.")
-            return []
     except Exception as e:
         print(f"Error observing login count: {e}")
-        return []
+
+
 
 # Create a counter for total login counts
 meter.create_observable_gauge(
