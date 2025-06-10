@@ -1,7 +1,7 @@
 import psycopg2
 import os
 from otel_config import meter
-from opentelemetry.sdk.metrics.callback import Observation
+from opentelemetry.metrics import Observation
 
 
 # Database connection details
