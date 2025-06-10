@@ -1,7 +1,6 @@
 import psycopg2
 import os
 from otel_config import meter
-from opentelemetry.sdk.metrics import Observation
 
 
 # Database connection details
@@ -85,7 +84,8 @@ def increment_login_count():
         print(f"Error incrementing total_count in the database: {e}")
         raise
 
-def get_login_total_count():
+
+def get_login_total_count(options):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -105,17 +105,16 @@ def get_login_total_count():
         print(f"Error observing login count: {e}")
         return []
 
-
-def db_login_count_callback(options):
-    count = get_login_total_count()
-    return [Observation(value=count, attributes={})]
-
-login_counter = meter.create_observable_gauge(
+# Create a counter for total login counts
+meter.create_observable_gauge(
     name="db_total_login_counts",
     description="Number of total logins recorded in the database",
     unit="1",
-    callbacks=[db_login_count_callback]
+    callbacks=[get_login_total_count]
 )
+
+
+
 
 
 
