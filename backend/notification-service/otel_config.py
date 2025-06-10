@@ -4,7 +4,6 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 # Set the CA certificate path via an environment variable
 os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
