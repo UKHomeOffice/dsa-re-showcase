@@ -1,7 +1,7 @@
 import psycopg2
 import os
 from otel_config import meter
-from opentelemetry.metrics import Observation
+from opentelemetry.sdk.metrics import Observation
 
 
 # Database connection details
@@ -106,7 +106,7 @@ def get_login_total_count():
         return []
 
 
-def db_login_count_callback():
+def db_login_count_callback(options):
     count = get_login_total_count()
     return [Observation(value=count, attributes={})]
 
