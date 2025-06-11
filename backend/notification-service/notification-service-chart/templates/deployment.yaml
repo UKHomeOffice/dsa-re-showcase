@@ -83,6 +83,19 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+            - name: POSTGRES_HOST
+              value: "notification-service-db.dsa-re-dev.svc.cluster.local"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "db_logins"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: POSTGRES_PASSWORD
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:

@@ -17,6 +17,7 @@ The system is designed around a fictional scenario, "**Rent a Unicorn**," where 
   - [Kafka Topics and Messaging](#kafka-topics-and-messaging)
   - [CronJob - Simulated User Login](#cronjob---simulated-user-login)
   - [Custom Metric - Counter](#custom-metric---counter)
+  - [Custom Metric - Counter Container DB](#custom-metric---counter-container-db)
   - [Setup](#setup)
     - [Clone the Monorepo](#clone-the-monorepo)
   - [Deploying to Kubernetes](#deploying-to-kubernetes)
@@ -110,6 +111,11 @@ Each microservice resides in its own subdirectory within the monorepo.
 
 - A **Counter** for the number of logins show how to publish custom metrics from the python code to any backend by OpenTelemetry (OTLP).
 - The notification-service custom_metric.py provide the set up module and the kafka_consumer.py include an increment counter trigger which data you can fetch in your backend monitoring tool.
+  
+## Custom Metric - Counter Container DB
+
+- A logins **Counter** have been created that save the count in a container db deployed in kubernetes. There are two counters, one that increase the count in the database and another counter that provides the total of logins from the db.
+- The notification-service otel_config.py provide the set up module for OTLP and the db.py that include the database connection, counters and logic.
 ---
 
 ## Setup

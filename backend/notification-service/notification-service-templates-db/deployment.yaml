@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service-db
+  namespace: dsa-re-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: notification-service-db
+      app.kubernetes.io/name: notification-service-db
+  ingress:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: notification-service-db
+        app.kubernetes.io/name: notification-service-db
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: postgres
+        image: quay.io/ukhomeofficedigital/dsa-re-notification-service-db:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-secret
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: pgdata
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: postgres-pvc
