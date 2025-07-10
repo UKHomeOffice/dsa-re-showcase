@@ -32,7 +32,7 @@ h1 {
 
 p {
   font-size: 1.2em;
-  color: whitesmoke;
+  color: black;
 }
 
 .button-container {
@@ -43,7 +43,7 @@ p {
   display: inline-block;
   padding: 15px 30px;
   background-color: #4caf50;
-  color: white;
+  color: black;
   text-decoration: none;
   border-radius: 5px;
   font-size: 1.2em;
