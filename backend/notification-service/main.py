@@ -17,6 +17,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+logger.info("Logger initialized in main.py")
 
 # Initialize the database
 try:
@@ -98,20 +99,20 @@ def simulate_login(email: str = "user@example.com"):
 async def startup_event():
     """Start Kafka consumer on startup"""
     logger.info("Starting application startup tasks...")
-    # try:
-    #     asyncio.create_task(
-    #         start_consumer(
-    #             bootstrap_servers=KAFKA_SERVERS, 
-    #             topic=KAFKA_TOPIC, 
-    #             group_id=KAFKA_GROUP_ID, 
-    #             recent_logins=recent_logins, 
-    #             max_logins=MAX_STORED_LOGINS, 
-    #             sdk=sdk,
-    #         )
-    #     )
-    logger.info("Kafka consumer task started successfully.")
-    # except Exception as e:
-    #     logger.error(f"Error during startup: {e}")
+    try:
+        asyncio.create_task(
+            start_consumer(
+                bootstrap_servers=KAFKA_SERVERS, 
+                topic=KAFKA_TOPIC, 
+                group_id=KAFKA_GROUP_ID, 
+                recent_logins=recent_logins, 
+                max_logins=MAX_STORED_LOGINS, 
+                sdk=sdk,
+            )
+        )
+        logger.info("Kafka consumer task started successfully.")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
 
 if __name__ == "__main__":
   import uvicorn
