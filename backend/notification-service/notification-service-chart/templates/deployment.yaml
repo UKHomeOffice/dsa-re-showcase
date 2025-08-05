@@ -112,6 +112,12 @@ spec:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+            - name: DT_LOGSTREAM
+              value: "true"
+            - name: DT_LOGSTREAM_PATH
+              value: "/var/log"
+            - name: LOG_FILE_PATH
+              value: "/var/log/notification_service.log"
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}

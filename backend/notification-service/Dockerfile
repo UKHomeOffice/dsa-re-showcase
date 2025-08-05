@@ -1,5 +1,11 @@
 FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.12-alpine3.21
 
+# Set environment variables
+ENV LOG_FILE_PATH=/var/log/notification_service.log
+
+# Create the log directory and set permissions
+RUN mkdir -p /var/log && chmod -R 777 /var/log
+
 WORKDIR /app
 
 COPY requirements.txt .

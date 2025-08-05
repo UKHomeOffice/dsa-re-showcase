@@ -8,11 +8,21 @@ from db import increment_login_count
 from custom_metric import login_event_counter
 import os
 
+# Configure logging
+log_file_path = os.getenv('LOG_FILE_PATH', '/var/log/notification_service.log')
+os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+
+logging.basicConfig(
+  filename=log_file_path,
+  level=logging.INFO,
+  format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 logger = logging.getLogger(__name__)
 
 async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
   """Start consuming login events from kafka"""
-  logging.info(f"Starting Kafka consumer: {bootstrap_servers}, topic: {topic}, group: {group_id}")
+  logger.info(f"Starting Kafka consumer: {bootstrap_servers}, topic: {topic}, group: {group_id}")
   
   # Certificate info
   cert_path = os.getenv('KAFKA_CERT_PATH', '/etc/kafka-certs')
@@ -48,10 +58,10 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
       for message in consumer:
         try:
             raw = message.value.decode('utf-8').strip()
-            logging.info(f"Raw login message: {raw}")
+            logger.info(f"Raw login message: {raw}")
             
             if not sdk:
-              logging.warning("Dynatrace SDK not initialized. Skipping tracing for this message.")
+              logger.warning("Dynatrace SDK not initialized. Skipping tracing for this message.")
             
             if sdk:
               with sdk.trace_custom_service('Process Kafka Login Message', 'notification-service'):
@@ -67,8 +77,8 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     email = parts[1].strip()
                     timestamp = parts[2].strip()
 
-                    logging.info(f"Login detected: {name} ({email}) at {timestamp}")
-                    logging.info(f"Notification sent to {email}")
+                    logger.info(f"Login detected: {name} ({email}) at {timestamp}")
+                    logger.info(f"Notification sent to {email}")
 
                     # Add the login event to recent_logins
                     login_event = {
@@ -82,15 +92,15 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
 
                     # Increment the counter metric
                     login_event_counter.add(1, {"event_type": "login"})
-                    logging.info("Custom metric 'login_event_counter' incremented by 1.")
+                    logger.info("Custom metric 'login_event_counter' incremented by 1.")
 
                     # Increment the total_count in the database
                     increment_login_count()
                 else:
-                    logging.warning("Unexpected message format. Skipping.")
+                    logger.warning("Unexpected message format. Skipping.")
 
         except Exception as e:
-            logging.error(f"Error processing message: {e}")
+            logger.error(f"Error processing message: {e}")
     except Exception as e:
       logger.error(f"Kafka connection error: {e}")
       await asyncio.sleep(5)  
