@@ -11,13 +11,16 @@ from db import initialize_db, test_db_connection
 
 # Centralized logger configuration
 logging.basicConfig(
-    filename="/var/log/notification_service.log",  # Path to the log file
     level=logging.INFO,  # Log level
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Log format
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("/var/log/notification_service.log"),  # Log to file
+        logging.StreamHandler()  # Log to console (stdout/stderr)
+    ],
 )
 
 logger = logging.getLogger(__name__)
-logging.info("Logger initialized in main.py")
+logger.info("Logger initialized in main.py")
 
 # Initialize the database
 try:
