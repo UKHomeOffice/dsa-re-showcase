@@ -9,42 +9,44 @@ import oneagent.sdk
 from db import initialize_db, test_db_connection
 
 
-# Configure logging
+# Centralized logger configuration
 logging.basicConfig(
-  level=logging.INFO,
-  format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    filename="/var/log/notification_service.log",  # Path to the log file
+    level=logging.INFO,  # Log level
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Log format
 )
+
 logger = logging.getLogger(__name__)
 
 # Initialize the database
 try:
-    logging.info("Starting database initialization...")
+    logger.info("Starting database initialization...")
     initialize_db()
-    logging.info("Database initialized successfully.")
+    logger.info("Database initialized successfully.")
 except Exception as e:
-    logging.error(f"Error initializing the database: {e}")
+    logger.error(f"Error initializing the database: {e}")
     raise
 
 # Test the database connection
 try:
-    logging.info("Starting database connection test...")
+    logger.info("Starting database connection test...")
     test_db_connection()
-    logging.info("Database connection test successful.")
+    logger.info("Database connection test successful.")
 except Exception as e:
-    logging.error(f"Database connection test failed: {e}")
+    logger.error(f"Database connection test failed: {e}")
     raise
 
 oneagent_init = oneagent.initialize()
 if not oneagent_init:
-  logging.warning('Error initializing OneAgent SDK.')
+  logger.warning('Error initializing OneAgent SDK.')
 else:
-  logging.info('Dynatrace SDK successfully initialized.')
+  logger.info('Dynatrace SDK successfully initialized.')
   
 sdk = oneagent.get_sdk()
 if not sdk:
-  logging.warning('Error: OneAgent SDK failed to instantiate.')
+  logger.warning('Error: OneAgent SDK failed to instantiate.')
 else:
-  logging.info('OneAgent SDK successfully instantiated.')
+  logger.info('OneAgent SDK successfully instantiated.')
 
 # create FastAPI app
 app =FastAPI(title="Notification Service") 

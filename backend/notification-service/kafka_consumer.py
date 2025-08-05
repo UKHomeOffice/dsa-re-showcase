@@ -12,12 +12,6 @@ import os
 log_file_path = os.getenv('LOG_FILE_PATH', '/var/log/notification_service.log')
 os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
 
-logging.basicConfig(
-  filename=log_file_path,
-  level=logging.INFO,
-  format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
 logger = logging.getLogger(__name__)
 
 async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_logins, sdk=None):
