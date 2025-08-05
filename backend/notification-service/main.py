@@ -17,7 +17,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-logger.info("Logger initialized in main.py")
+logging.info("Logger initialized in main.py")
 
 # Initialize the database
 try:
