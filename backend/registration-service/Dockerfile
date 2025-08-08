@@ -10,7 +10,7 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # Copy over maven wrapper files
-COPY backend/registration-service/.mvnw .
+COPY backend/registration-service/mvnw .
 COPY backend/registration-service/mvnw.cmd .
 COPY backend/registration-service/.mvn ./.mvn
 
