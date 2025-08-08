@@ -6,25 +6,58 @@ platform:
   os: linux
   arch: amd64
 
-steps:
-
-  - name: docker
-    image: plugins/docker
-    settings:
-      dockerfile: backend/registration-service/Dockerfile
-      registry: quay.io
-      context: backend/registration-service
-      tags:
-      - latest
-      repo: quay.io/ukhomeofficedigital/dsa-re-registration-service
-      username:
-        from_secret: ROBOT_QUAY_USER
-      password:
-        from_secret: ROBOT_QUAY_PASS
-
 trigger:
   event:
   - push
+
+steps:
+
+  - name: build-and-tag-image-registration-service
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+    commands:
+      # wait for drone docker service (docker server running the docker daemon) to be up before running docker build
+      - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream; do n=$(( n + 1 )); sleep 1; done
+      - if ! docker stats --no-stream; then echo "Docker appears not to be running"; exit 1; fi
+      # build and tag the image
+      - docker build --no-cache -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
+    volumes:
+      - name: dockersock
+        path: /var/run
+
+  - name: trivy-scan-image-registration-service
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
+    pull: always
+    environment:
+        IMAGE_NAME: quay.io/ukhomeofficedigital/dsa-re-registration-service:latest
+        SEVERITY: CRITICAL --dependency-tree
+        FAIL_ON_DETECTION: true
+        IGNORE_UNFIXED: false
+        ALLOW_CVE_LIST_FILE: .trivyignore.yaml
+
+  
+  
+  - name: publish-image-latest-registration-service
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+    environment:
+      ROBOT_QUAY_USER:
+        from_secret: ROBOT_QUAY_USER
+      ROBOT_QUAY_PASS:
+        from_secret: ROBOT_QUAY_PASS
+    commands:
+      - echo "$${ROBOT_QUAY_PASS}" | docker login -u "$${ROBOT_QUAY_USER}" --password-stdin quay.io
+      - docker push quay.io/ukhomeofficedigital/dsa-re-registration-service:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
+
+
+services:
+  - name: docker
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+
+volumes:
+  - name: dockersock
+    temp: {}
 
   # - name: debug-versions
   #   image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
