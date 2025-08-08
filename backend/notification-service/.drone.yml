@@ -35,19 +35,19 @@ steps:
         IGNORE_UNFIXED: false
         ALLOW_CVE_LIST_FILE: .trivyignore.yaml
   
-  - name: docker-notification-service
-    image: plugins/docker
-    settings:
-      dockerfile: backend/notification-service/Dockerfile
-      registry: quay.io
-      context: backend/notification-service
-      tags:
-      - latest
-      repo: quay.io/ukhomeofficedigital/dsa-re-notification-service
-      username:
-        from_secret: ROBOT_QUAY_USER
-      password:
-        from_secret: ROBOT_QUAY_PASS
+  - name: publish-image-latest-notification-service
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+    environment:
+      RE_ROBOT_QUAY_USER:
+        from_secret: RE_ROBOT_QUAY_USER
+      RE_ROBOT_QUAY_PASS:
+        from_secret: RE_ROBOT_QUAY_PASS
+    commands:
+      - echo "$${RE_ROBOT_QUAY_PASS}" | docker login -u "$${RE_ROBOT_QUAY_USER}" --password-stdin quay.io
+      - docker push quay.io/ukhomeofficedigital/dsa-re-notification-service:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
 
 
 services:

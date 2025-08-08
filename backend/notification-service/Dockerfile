@@ -1,4 +1,4 @@
-FROM python:3.11.12-alpine3.20
+FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.12-alpine3.20
 
 # Set environment variables
 ENV LOG_FILE_PATH=/var/log/notification_service.log
