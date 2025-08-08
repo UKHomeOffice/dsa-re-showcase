@@ -13,7 +13,7 @@ trigger:
 
 steps:
 
-  - name: build-and-tag-image
+  - name: build-and-tag-image-notification-service
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
     commands:
       # wait for drone docker service (docker server running the docker daemon) to be up before running docker build
@@ -25,7 +25,7 @@ steps:
       - name: dockersock
         path: /var/run
 
-  - name: trivy-scan-image
+  - name: trivy-scan-image-notification-service
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
     pull: always
     environment:
