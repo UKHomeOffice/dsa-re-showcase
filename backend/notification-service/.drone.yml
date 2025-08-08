@@ -13,6 +13,11 @@ trigger:
 
 steps:
 
+  - name: debug-build-context
+    image: alpine
+    commands:
+      - ls -l backend/notification-service
+
   - name: build-and-tag-image-notification-service
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
     commands:
