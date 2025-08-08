@@ -19,7 +19,7 @@ steps:
       - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream; do n=$(( n + 1 )); sleep 1; done
       - if ! docker stats --no-stream; then echo "Docker appears not to be running"; exit 1; fi
       # build and tag the image
-      - docker build --no-cache -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
+      - docker build --no-cache -f backend/registration-service/Dockerfile -t quay.io/ukhomeofficedigital/dsa-re-registration-service:latest .
     volumes:
       - name: dockersock
         path: /var/run
