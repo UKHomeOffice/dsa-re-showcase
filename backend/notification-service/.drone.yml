@@ -13,11 +13,6 @@ trigger:
 
 steps:
 
-  - name: debug-build-context
-    image: alpine
-    commands:
-      - ls -l backend/notification-service
-
   - name: build-and-tag-image-notification-service
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
     commands:
@@ -26,7 +21,7 @@ steps:
       - if ! docker stats --no-stream; then echo "Docker appears not to be running"; exit 1; fi
       # build and tag the image
       - cd backend/notification-service
-      - docker build --build-arg CI_COMMIT_SHA=$${DRONE_COMMIT} --no-cache -t quay.io/ukhomeofficedigital/dsa-re-notification-service:latest .
+      - docker build --no-cache -f backend/notification-service/Dockerfile -t quay.io/ukhomeofficedigital/dsa-re-notification-service:latest .
     volumes:
       - name: dockersock
         path: /var/run

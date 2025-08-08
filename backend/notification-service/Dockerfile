@@ -8,7 +8,7 @@ RUN mkdir -p /var/log && chmod -R 777 /var/log
 
 WORKDIR /app
 
-COPY backend/notification_service/requirements.txt .
+COPY backend/notification-service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 ADD https://raw.githubusercontent.com/UKHomeOffice/acp-ca/master/ca.pem /app/acp_root_ca.crt
 
@@ -24,3 +24,5 @@ RUN chmod -R 755 /app
 EXPOSE 8000
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+
