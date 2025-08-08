@@ -40,9 +40,9 @@ steps:
   - name: publish-image-latest-notification-service
     image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
     environment:
-      RE_ROBOT_QUAY_USER:
+      ROBOT_QUAY_USER:
         from_secret: ROBOT_QUAY_USER
-      RE_ROBOT_QUAY_PASS:
+      ROBOT_QUAY_PASS:
         from_secret: ROBOT_QUAY_PASS
     commands:
       - echo "$${ROBOT_QUAY_PASS}" | docker login -u "$${ROBOT_QUAY_USER}" --password-stdin quay.io
