@@ -10,16 +10,16 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # Copy over maven wrapper files
-COPY mvnw .
-COPY mvnw.cmd .
-COPY .mvn ./.mvn
+COPY backend/registration-service/.mvnw .
+COPY backend/registration-service/mvnw.cmd .
+COPY backend/registration-service/.mvn ./.mvn
 
 # Ensure mvnw is executable
 RUN chmod +x mvnw
 
 # Copy over pom and application source code
-COPY pom.xml .
-COPY src ./src
+COPY backend/registration-service/pom.xml .
+COPY backend/registration-service/src ./src
 
 # Compile code into jar
 RUN ./mvnw clean install -Dskiptests
