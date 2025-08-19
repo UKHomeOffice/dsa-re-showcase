@@ -1,0 +1,42 @@
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  type: ClusterIP
+  port: 80
+
+imagePullSecrets: []
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# kafka config - preprod MSK cluster
+kafka:
+  bootstrapServers: "b-1.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094,b-2.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094"
+  topic: "user-login"
+  groupId: "notification-service"
+  certPath: "/etc/kafka-certs"
+
+# Preprod-specific configuration
+environment: preprod
