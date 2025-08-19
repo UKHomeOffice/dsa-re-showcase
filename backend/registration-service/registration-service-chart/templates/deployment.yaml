@@ -107,28 +107,60 @@ spec:
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: dsarepreprodshowcase-rds
+                  {{- else }}
                   name: dsaredevshowcase-rds
+                  {{- end }}
                   key: endpoint
             - name: SHOWCASE_SERVICES_DB_PORT
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: dsarepreprodshowcase-rds
+                  {{- else }}
                   name: dsaredevshowcase-rds
+                  {{- end }}
                   key: port
             - name: SHOWCASE_SERVICES_DB_NAME
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: dsarepreprodshowcase-rds
+                  {{- else }}
                   name: dsaredevshowcase-rds
+                  {{- end }}
                   key: default_db
             - name: SHOWCASE_SERVICES_DB_USER
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: dsarepreprodshowcase-rds
+                  {{- else }}
                   name: dsaredevshowcase-rds
+                  {{- end }}
                   key: username
             - name: SHOWCASE_SERVICES_DB_PWD
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: dsarepreprodshowcase-rds
+                  {{- else }}
                   name: dsaredevshowcase-rds
+                  {{- end }}
                   key: password
+            {{- if eq .Values.environment "preprod" }}
+            - name: DYNATRACE_PROD_METRICS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-prod-metrics-ingest
+                  key: token
+            - name: DYNATRACE_PROD_METRICS_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-prod-metrics-ingest
+                  key: api_url
+            {{- else }}
             - name: DYNATRACE_METRICS_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -139,6 +171,7 @@ spec:
                 secretKeyRef:
                   name: registration-service-dynatrace-metrics-ingest
                   key: api_url
+            {{- end }}
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m

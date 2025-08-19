@@ -1,0 +1,35 @@
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  type: ClusterIP
+  port: 80
+
+imagePullSecrets: []
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Preprod-specific configuration
+environment: preprod
