@@ -52,21 +52,21 @@ metrics.set_meter_provider(meter_provider)
 # Get a reusable meter instance
 meter = metrics.get_meter("notification-service")
 
-# 2. Set up OpenTelemetry LoggerProvider
+# 1. Set up OpenTelemetry LoggerProvider
 logger_provider = LoggerProvider(
     resource=Resource.create({"service.name": "notification-service"})
 )
 set_logger_provider(logger_provider)
 
-# 3. Add a log processor with OTLP exporter
+# 2. Add a log processor with OTLP exporter
 log_exporter = OTLPLogExporter(
     endpoint=f"{OTLP_ENDPOINT}/logs",
     headers={"Authorization": f"Api-Token {DYNATRACE_LOGS_TOKEN}"},
-    insecure=True  
+    insecure=True  # Set to False if using HTTPS with a valid certificate
 )
 logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
 
-# 4. Hook into Python's logging module
+# 3. Hook into Python's logging module
 logging_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
 logging.basicConfig(
     level=logging.INFO,
@@ -74,5 +74,5 @@ logging.basicConfig(
     handlers=[logging_handler],
 )
 
-# 5. Create a reusable logger instance
-otel_logger = get_logger("notification-service")
+# 4. Create a reusable logger instance
+otel_logger = logging.getLogger("notification-service")
