@@ -25,3 +25,6 @@ replay_pid*
 
 # MacOS files
 .DS_Store
+
+# VS Code workspace files
+*.code-workspace

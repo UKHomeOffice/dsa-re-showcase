@@ -1,71 +1,71 @@
-# AUTOMATION VERSION - SAVED FOR FUTURE USE
-# This file contains the full automation pipeline for preprod deployment
-# Currently using manual deployment approach (see preprod-secrets.sh and deploy-preprod.sh)
-# To enable automation: cp .drone-automated.yml .drone.yml
+# # AUTOMATION VERSION - SAVED FOR FUTURE USE
+# # This file contains the full automation pipeline for preprod deployment
+# # Currently using manual deployment approach (see preprod-secrets.sh and deploy-preprod.sh)
+# # To enable automation: cp .drone-automated.yml .drone.yml
 
-kind: pipeline
-type: kubernetes
-name: preprod-deployment
+# kind: pipeline
+# type: kubernetes
+# name: preprod-deployment
 
-platform:
-  os: linux
-  arch: amd64
+# platform:
+#   os: linux
+#   arch: amd64
 
-trigger:
-  branch:
-    - main
-  event:
-    - push
+# trigger:
+#   branch:
+#     - main
+#   event:
+#     - push
 
-steps:
-- name: setup-preprod-secrets
-  image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
-  environment:
-    PREPROD_RDS_ENDPOINT:
-      from_secret: PREPROD_RDS_ENDPOINT
-    DB_NAME:
-      from_secret: DB_NAME
-    DB_USERNAME:
-      from_secret: DB_USERNAME
-    DB_PASSWORD:
-      from_secret: DB_PASSWORD
-    DT_PROD_METRICS_TOKEN:
-      from_secret: DT_PROD_METRICS_TOKEN
-    DT_PROD_METRICS_API_URL:
-      from_secret: DT_PROD_METRICS_API_URL
-    DT_PROD_API_URL:
-      from_secret: DT_PROD_API_URL
-    DT_PROD_PAAS_TOKEN:
-      from_secret: DT_PROD_PAAS_TOKEN
-    KUBE_SERVER:
-      from_secret: KUBE_SERVER_NOT_PROD
-    KUBE_TOKEN:
-      from_secret: KUBE_TOKEN_PREPROD
-    KUBE_NAMESPACE:
-      from_secret: KUBE_NAMESPACE_PREPROD
-  commands:
-  - kubectl config set-cluster preprod --server=$KUBE_SERVER
-  - kubectl config set-credentials preprod-user --token=$KUBE_TOKEN
-  - kubectl config set-context preprod --cluster=preprod --user=preprod-user --namespace=$KUBE_NAMESPACE
-  - kubectl config use-context preprod
-  - chmod +x ./preprod-secrets.sh
-  - ./preprod-secrets.sh
+# steps:
+# - name: setup-preprod-secrets
+#   image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
+#   environment:
+#     PREPROD_RDS_ENDPOINT:
+#       from_secret: PREPROD_RDS_ENDPOINT
+#     DB_NAME:
+#       from_secret: DB_NAME
+#     DB_USERNAME:
+#       from_secret: DB_USERNAME
+#     DB_PASSWORD:
+#       from_secret: DB_PASSWORD
+#     DT_PROD_METRICS_TOKEN:
+#       from_secret: DT_PROD_METRICS_TOKEN
+#     DT_PROD_METRICS_API_URL:
+#       from_secret: DT_PROD_METRICS_API_URL
+#     DT_PROD_API_URL:
+#       from_secret: DT_PROD_API_URL
+#     DT_PROD_PAAS_TOKEN:
+#       from_secret: DT_PROD_PAAS_TOKEN
+#     KUBE_SERVER:
+#       from_secret: KUBE_SERVER_NOT_PROD
+#     KUBE_TOKEN:
+#       from_secret: KUBE_TOKEN_PREPROD
+#     KUBE_NAMESPACE:
+#       from_secret: KUBE_NAMESPACE_PREPROD
+#   commands:
+#   - kubectl config set-cluster preprod --server=$KUBE_SERVER
+#   - kubectl config set-credentials preprod-user --token=$KUBE_TOKEN
+#   - kubectl config set-context preprod --cluster=preprod --user=preprod-user --namespace=$KUBE_NAMESPACE
+#   - kubectl config use-context preprod
+#   - chmod +x ./preprod-secrets.sh
+#   - ./preprod-secrets.sh
 
-- name: deploy-to-preprod
-  image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
-  environment:
-    KUBE_SERVER:
-      from_secret: KUBE_SERVER_NOT_PROD
-    KUBE_TOKEN:
-      from_secret: KUBE_TOKEN_PREPROD
-    KUBE_NAMESPACE:
-      from_secret: KUBE_NAMESPACE_PREPROD
-  commands:
-  - kubectl config set-cluster preprod --server=$KUBE_SERVER
-  - kubectl config set-credentials preprod-user --token=$KUBE_TOKEN
-  - kubectl config set-context preprod --cluster=preprod --user=preprod-user --namespace=$KUBE_NAMESPACE
-  - kubectl config use-context preprod
-  - chmod +x ./deploy-preprod.sh
-  - ./deploy-preprod.sh
-  depends_on:
-  - setup-preprod-secrets
+# - name: deploy-to-preprod
+#   image: quay.io/ukhomeofficedigital/helm:3.15.4-build.1
+#   environment:
+#     KUBE_SERVER:
+#       from_secret: KUBE_SERVER_NOT_PROD
+#     KUBE_TOKEN:
+#       from_secret: KUBE_TOKEN_PREPROD
+#     KUBE_NAMESPACE:
+#       from_secret: KUBE_NAMESPACE_PREPROD
+#   commands:
+#   - kubectl config set-cluster preprod --server=$KUBE_SERVER
+#   - kubectl config set-credentials preprod-user --token=$KUBE_TOKEN
+#   - kubectl config set-context preprod --cluster=preprod --user=preprod-user --namespace=$KUBE_NAMESPACE
+#   - kubectl config use-context preprod
+#   - chmod +x ./deploy-preprod.sh
+#   - ./deploy-preprod.sh
+#   depends_on:
+#   - setup-preprod-secrets

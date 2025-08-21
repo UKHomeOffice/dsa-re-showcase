@@ -3,54 +3,54 @@
 # Currently using manual deployment approach (see preprod-secrets.sh and deploy-preprod.sh)
 # This file is preserved for future automation options
 
-kind: pipeline
-type: kubernetes
-name: preprod-deployment
+# kind: pipeline
+# type: kubernetes
+# name: preprod-deployment
 
-trigger:
-  branch:
-    - main
-  event:
-    - push
+# trigger:
+#   branch:
+#     - main
+#   event:
+#     - push
 
-steps:
-- name: setup-preprod-secrets
-  image: quay.io/ukhomeofficedigital/kd:latest
-  environment:
-    PREPROD_RDS_ENDPOINT:
-      from_secret: PREPROD_RDS_ENDPOINT
-    DB_NAME:
-      from_secret: DB_NAME
-    DB_USERNAME:
-      from_secret: DB_USERNAME
-    DB_PASSWORD:
-      from_secret: DB_PASSWORD
-    DT_PROD_METRICS_TOKEN:
-      from_secret: DT_PROD_METRICS_TOKEN
-    DT_PROD_METRICS_API_URL:
-      from_secret: DT_PROD_METRICS_API_URL
-    DT_PROD_API_URL:
-      from_secret: DT_PROD_API_URL
-    DT_PROD_PAAS_TOKEN:
-      from_secret: DT_PROD_PAAS_TOKEN
-  commands:
-  - ./preprod-secrets.sh
+# steps:
+# - name: setup-preprod-secrets
+#   image: quay.io/ukhomeofficedigital/kd:latest
+#   environment:
+#     PREPROD_RDS_ENDPOINT:
+#       from_secret: PREPROD_RDS_ENDPOINT
+#     DB_NAME:
+#       from_secret: DB_NAME
+#     DB_USERNAME:
+#       from_secret: DB_USERNAME
+#     DB_PASSWORD:
+#       from_secret: DB_PASSWORD
+#     DT_PROD_METRICS_TOKEN:
+#       from_secret: DT_PROD_METRICS_TOKEN
+#     DT_PROD_METRICS_API_URL:
+#       from_secret: DT_PROD_METRICS_API_URL
+#     DT_PROD_API_URL:
+#       from_secret: DT_PROD_API_URL
+#     DT_PROD_PAAS_TOKEN:
+#       from_secret: DT_PROD_PAAS_TOKEN
+#   commands:
+#   - ./preprod-secrets.sh
 
-- name: deploy-to-preprod
-  image: quay.io/ukhomeofficedigital/kd:latest
-  commands:
-  - ./deploy-preprod.sh
-  depends_on:
-  - setup-preprod-secrets
+# - name: deploy-to-preprod
+#   image: quay.io/ukhomeofficedigital/kd:latest
+#   commands:
+#   - ./deploy-preprod.sh
+#   depends_on:
+#   - setup-preprod-secrets
 
-- name: notify-deployment
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: SLACK_WEBHOOK
-    channel: deployments
-    template: |
-      Preprod deployment completed successfully!
-      Access: http://frontend-service.preprod.dsa-re-notprod.homeoffice.gov.uk/
-  depends_on:
-  - deploy-to-preprod
+# - name: notify-deployment
+#   image: plugins/slack
+#   settings:
+#     webhook:
+#       from_secret: SLACK_WEBHOOK
+#     channel: deployments
+#     template: |
+#       Preprod deployment completed successfully!
+#       Access: http://frontend-service.preprod.dsa-re-notprod.homeoffice.gov.uk/
+#   depends_on:
+#   - deploy-to-preprod
