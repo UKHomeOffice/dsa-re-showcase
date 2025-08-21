@@ -29,7 +29,7 @@ os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 
 OTLP_ENDPOINT = os.getenv(
     "OTLP_ENDPOINT",
-    "https://activegate-notprod.dynatrace-corecloud-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/otlp/v1"
+    "https://dynatrace-activegate-notprod-testing.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1"
 )
 
 DYNATRACE_PAAS_TOKEN = os.getenv("DYNATRACE_PAAS_TOKEN")
