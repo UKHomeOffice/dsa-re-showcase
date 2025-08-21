@@ -1,3 +1,8 @@
+# ALTERNATIVE AUTOMATION VERSION - SAVED FOR FUTURE USE
+# This is an alternative automation configuration for preprod deployment
+# Currently using manual deployment approach (see preprod-secrets.sh and deploy-preprod.sh)
+# This file is preserved for future automation options
+
 kind: pipeline
 type: kubernetes
 name: preprod-deployment

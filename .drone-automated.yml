@@ -1,3 +1,8 @@
+# AUTOMATION VERSION - SAVED FOR FUTURE USE
+# This file contains the full automation pipeline for preprod deployment
+# Currently using manual deployment approach (see preprod-secrets.sh and deploy-preprod.sh)
+# To enable automation: cp .drone-automated.yml .drone.yml
+
 kind: pipeline
 type: kubernetes
 name: preprod-deployment
