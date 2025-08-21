@@ -5,10 +5,12 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk._logs import LogEmitterProvider, LoggingHandler  # Use the experimental `_logs` namespace
-from opentelemetry.sdk._logs.export import BatchLogProcessor
-from opentelemetry.exporter.otlp.proto.http.log_exporter import OTLPLogExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs import set_logger_provider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.sdk.resources import Resource
+
 
 # Set the CA certificate path via an environment variable
 os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
@@ -38,29 +40,27 @@ metrics.set_meter_provider(meter_provider)
 # Get a reusable meter instance
 meter = metrics.get_meter("notification-service")
 
-# Initialize OpenTelemetry Log Exporter
-log_exporter = OTLPLogExporter(
-    endpoint=f"{OTLP_ENDPOINT}/logs",
-    headers={
-        "Authorization": f"Api-Token {DYNATRACE_LOGS_TOKEN}",
-        "Content-Type": "application/x-protobuf"
-    },
-)
-
-# Set up the LogEmitterProvider with the Log Exporter
-log_emitter_provider = LogEmitterProvider(
+# 1. Set up an OpenTelemetry LoggerProvider
+logger_provider = LoggerProvider(
     resource=Resource.create({"service.name": "notification-service"})
 )
-log_emitter_provider.add_log_processor(BatchLogProcessor(log_exporter))
+set_logger_provider(logger_provider)
 
-# Attach OpenTelemetry LoggingHandler to Python's logging module
+# 2. Add a log processor with OTLP exporter
+log_exporter = OTLPLogExporter(
+    endpoint=OTLP_ENDPOINT,
+    headers={"Authorization": f"Api-Token {DYNATRACE_LOGS_TOKEN}"},
+    insecure=True  # Set to False if using HTTPS with a valid certificate
+)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
+
+# 3. Hook into Python's logging module
+logging_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        LoggingHandler(level=logging.INFO, log_emitter_provider=log_emitter_provider),
-    ],
+    handlers=[logging_handler],
 )
 
-# Create a reusable logger instance
+# 4. Create a reusable logger instance
 otel_logger = logging.getLogger("notification-service")
