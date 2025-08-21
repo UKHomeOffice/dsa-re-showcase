@@ -99,8 +99,13 @@ spec:
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
+                  name: notification-service-dynatrace-metrics-ingest
                   key: token
+            - name: DYNATRACE_LOGS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-dynatrace-inject-logs
+                  key: logs-ingest-token
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}
             - name: KAFKA_TOPIC
