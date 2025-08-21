@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Setup Preprod Secrets for Showcase Services
-# Run this script before deploying to preprod environment
+# Setup Preprod Secrets for Showcase Services (Manual)
+# This script displays the commands to create secrets manually
+# Following the same pattern as dev environment
 
 set -e
 
@@ -14,7 +15,7 @@ kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -
 
 echo "Please create the following secrets manually in ${NAMESPACE} namespace:"
 echo ""
-echo "1. RDS Database Secret:"
+echo "1. RDS Database Secret (referenced by Helm templates):"
 echo "kubectl create secret generic dsarepreprodshowcase-rds \\"
 echo "  --from-literal=endpoint=<PREPROD_RDS_ENDPOINT> \\"
 echo "  --from-literal=port=5432 \\"
@@ -36,3 +37,4 @@ echo "  --from-literal=paas-installer-download-token=<DT_PROD_PAAS_TOKEN> \\"
 echo "  --namespace ${NAMESPACE}"
 echo ""
 echo "Replace <PLACEHOLDER> values with actual preprod credentials."
+echo "After creating secrets, run ./deploy-preprod.sh to deploy services."
