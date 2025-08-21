@@ -3,13 +3,12 @@ import logging
 from opentelemetry import metrics
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.logs import LogEmitterProvider, LoggingHandler
-from opentelemetry.sdk.logs.export import BatchLogProcessor
-from opentelemetry.exporter.otlp.proto.http.log_exporter import OTLPLogExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.logs import LoggingHandler
-
+from opentelemetry.sdk._logs import LogEmitterProvider, LoggingHandler  # Use the experimental `_logs` namespace
+from opentelemetry.sdk._logs.export import BatchLogProcessor
+from opentelemetry.exporter.otlp.proto.http.log_exporter import OTLPLogExporter
+from opentelemetry.sdk.resources import Resource
 
 # Set the CA certificate path via an environment variable
 os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
@@ -52,9 +51,11 @@ log_exporter = OTLPLogExporter(
 log_emitter_provider = LogEmitterProvider(
     resource=Resource.create({"service.name": "notification-service"})
 )
+log_emitter_provider.add_log_processor(BatchLogProcessor(log_exporter))
+
 # Attach OpenTelemetry LoggingHandler to Python's logging module
 logging.basicConfig(
-    level=logging.INFO,  # Set the log level
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         LoggingHandler(level=logging.INFO, log_emitter_provider=log_emitter_provider),
