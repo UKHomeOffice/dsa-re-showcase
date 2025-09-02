@@ -112,6 +112,8 @@ spec:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+            - name: DT_NETWORK_ZONE
+              value: dsa-notprod-acp-notprod-rtg-00
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}

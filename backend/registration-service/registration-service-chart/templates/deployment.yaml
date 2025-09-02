@@ -106,6 +106,8 @@ spec:
           env:
             - name: RANDOM
               value: {{ randAlphaNum 5 | quote }}
+            - name: DT_NETWORK_ZONE
+              value: dsa-notprod-acp-notprod-rtg-00
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
