@@ -7,8 +7,8 @@
 
     <changeSet id="2" author="Chris Hunter" context="local,dsa-re-dev,dsa-re-preprod">
         <insert tableName="users">
-            <column name="name" value="Chris"/>
-            <column name="email" value="Chris.Hunter@gmail.com"/>
+            <column name="name" value="Kingsford Johnson"/>
+            <column name="email" value="Kingsford.Johnson@gmail.com"/>
             <column name="dob" value="1989-07-27"/>
             <column name="password" value="chrispassword"/>
             <column name="role" value="customer"/>
