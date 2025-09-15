@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="2" author="Chris Hunter" context="local,dsa-re-dev">
+    <changeSet id="2" author="Chris Hunter" context="local,dsa-re-dev,dsa-re-preprod">
         <insert tableName="users">
             <column name="name" value="Chris"/>
             <column name="email" value="Chris.Hunter@gmail.com"/>
@@ -28,7 +28,7 @@
     </changeSet>
 
     <!-- 4. Sync user_sequence to the max id in the users table -->
-    <changeSet id="4" author="Chris Hunter" context="local,dsa-re-dev">
+    <changeSet id="4" author="Chris Hunter" context="local,dsa-re-dev,dsa-re-preprod">
         <sql>
             <![CDATA[
             SELECT setval('user_sequence', (SELECT MAX(id) FROM users));
