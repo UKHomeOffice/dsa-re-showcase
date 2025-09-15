@@ -60,7 +60,7 @@ spec:
             - name: TRUSTSTORE_RUNTIME
               value: /certs
             - name: TRUSTSTORE_PASSWORD
-              value: changeit    
+              value: changeit
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
