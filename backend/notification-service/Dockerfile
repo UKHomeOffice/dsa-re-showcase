@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.12-alpine3.21
+FROM quay.io/ukhomeofficedigital/dsa-re-python:3.11.13-alpine3.22
 
 WORKDIR /app
 
