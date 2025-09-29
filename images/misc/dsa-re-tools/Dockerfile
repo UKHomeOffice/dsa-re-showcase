@@ -1,4 +1,4 @@
-ARG ALPINE_TAG=latest
+ARG ALPINE_TAG=3.22.1
 FROM alpine:${ALPINE_TAG}
 
 RUN apk -U upgrade \
