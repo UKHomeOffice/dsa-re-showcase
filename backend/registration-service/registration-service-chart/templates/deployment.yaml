@@ -34,7 +34,7 @@ spec:
       initContainers:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
-          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:latest
           env:
             - name: DYNATRACE_API_URL
               valueFrom:
@@ -50,6 +50,10 @@ spec:
               value: flavor=multidistro&include=java
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
+            - name: DYNATRACE_ONEAGENT_VERSION
+              value: latest
+            - name: DYNATRACE_SKIP_SSL_VERIFICATION
+              value: "true"
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
