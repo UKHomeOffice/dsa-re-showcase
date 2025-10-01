@@ -109,6 +109,15 @@ spec:
               value: {{ .Values.kafka.groupId }}
             - name: KAFKA_CERT_PATH
               value: {{ .Values.kafka.certPath }}
+          {{- if .Values.otlp }}
+            - name: OTLP_ENDPOINT
+              value: {{ .Values.otlp.endpoint }}
+            - name: DYNATRACE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.otlp.tokenSecret.name }}
+                  key: {{ .Values.otlp.tokenSecret.key }}
+          {{- end }}
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
