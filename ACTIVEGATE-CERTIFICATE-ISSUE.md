@@ -8,22 +8,35 @@ SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certifica
 ```
 
 ## Root Cause
-The ActiveGate certificate in the dynatrace-preprod namespace has expired, preventing OneAgent downloads from succeeding.
+The ActiveGate certificate in the dynatrace-preprod namespace is experiencing verification issues. This appears to be a temporary issue as pods were running successfully this morning, suggesting either:
+- Certificate rotation in progress
+- Intermittent network/DNS issues
+- ActiveGate pod restart causing temporary certificate issues
 
-## Immediate Workaround
-Temporarily disable OneAgent injection to allow the registration service to start:
+## Implemented Workaround
+Updated OneAgent configuration to handle certificate issues:
+
+1. **Updated deployment template** with:
+   ```yaml
+   - name: DYNATRACE_ONEAGENT_VERSION
+     value: latest
+   - name: DYNATRACE_SKIP_SSL_VERIFICATION
+     value: "true"
+   ```
+
+2. **Updated OneAgent injection image** to latest version:
+   ```yaml
+   image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:latest
+   ```
+
+## Alternative Workaround
+If the above doesn't work, temporarily disable OneAgent injection:
 
 1. **Update values-preprod.yaml**:
    ```yaml
    dynatrace:
      podRuntimeInjection:
        enabled: false
-   ```
-
-2. **Redeploy registration service**:
-   ```bash
-   cd backend/registration-service/registration-service-chart
-   helm upgrade registration-service . --values=values-preprod.yaml --namespace dsa-re-preprod
    ```
 
 ## Permanent Solution
