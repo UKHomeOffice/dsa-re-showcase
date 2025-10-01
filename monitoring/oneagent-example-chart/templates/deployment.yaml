@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride | default (include "oneagent-example.fullname" .) }}
+  labels:
+    app: oneagent-example
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: oneagent-example
+  template:
+    metadata:
+      labels:
+        app: oneagent-example
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      initContainers:
+      {{- if .Values.dynatrace.podRuntimeInjection.enabled }}
+        - name: oneagent-example-init-container
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
+          env:
+            - name: DYNATRACE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: oneagent-example-dynatrace-oneagent
+                  key: api-url
+            - name: DYNATRACE_PAAS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: oneagent-example-dynatrace-oneagent
+                  key: paas-installer-download-token
+            - name: DYNATRACE_ONEAGENT_OPTIONS
+              value: flavor=multidistro&include=java
+            - name: DYNATRACE_INSTALL_DIR
+              value: /opt/dynatrace/oneagent
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - mountPath: /opt/dynatrace/oneagent
+              name: oneagent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+      {{- end }}
+      containers:
+        - name: oneagent-example-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sleep", "3600"]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.dynatrace.podRuntimeInjection.enabled }}
+          env:
+            - name: LD_PRELOAD
+              value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+          volumeMounts:
+            - name: oneagent
+              mountPath: /opt/dynatrace/oneagent
+          {{- end }}
+      volumes:
+      {{- if .Values.dynatrace.podRuntimeInjection.enabled }}
+        - name: oneagent
+          emptyDir: {}
+      {{- end }}

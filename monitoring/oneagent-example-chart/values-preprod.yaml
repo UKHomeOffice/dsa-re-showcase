@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/ukhomeofficedigital/alpine
+  tag: "v3.15"
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: "oneagent-example-deployment"
+
+serviceAccount:
+  create: false
+  automount: true
+  name: "dynatrace-oneagent-metadata-viewer"
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Preprod-specific configuration
+environment: preprod

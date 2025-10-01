@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/ukhomeofficedigital/dsa-re-oneagent-init-failure-watcher
+  tag: "latest"
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: "oneagent-init-failure-watcher"
+
+serviceAccount:
+  create: false
+  automount: true
+  name: "dynatrace-oneagent-metadata-viewer"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Preprod-specific configuration
+environment: preprod

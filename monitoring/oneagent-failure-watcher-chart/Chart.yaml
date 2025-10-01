@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oneagent-failure-watcher
+description: OneAgent failure watcher for monitoring init container failures
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

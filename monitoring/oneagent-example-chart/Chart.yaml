@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oneagent-example
+description: OneAgent example deployment for testing Dynatrace integration
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
