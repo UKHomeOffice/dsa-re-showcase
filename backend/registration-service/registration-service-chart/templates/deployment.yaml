@@ -149,6 +149,8 @@ spec:
                   name: dsaredevshowcase-rds
                   {{- end }}
                   key: password
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(SHOWCASE_SERVICES_DB_ENDPOINT):$(SHOWCASE_SERVICES_DB_PORT)/$(SHOWCASE_SERVICES_DB_NAME)"
             {{- if eq .Values.environment "preprod" }}
             - name: DYNATRACE_PROD_METRICS_TOKEN
               valueFrom:
