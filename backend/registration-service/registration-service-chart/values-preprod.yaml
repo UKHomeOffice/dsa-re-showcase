@@ -18,6 +18,7 @@ imagePullSecrets: []
 dynatrace:
   podRuntimeInjection:
     enabled: true
+  metricsSecretName: registration-service-dynatrace-prod-metrics-ingest
 
 image:
   pullPolicy: Always
@@ -33,3 +34,8 @@ resources:
 
 # Preprod-specific configuration
 environment: preprod
+
+# Database configuration
+database:
+  secretName: dsareprprodshowcase-rds
+  nameOverride: postgres  # Override for preprod due to secret data issue

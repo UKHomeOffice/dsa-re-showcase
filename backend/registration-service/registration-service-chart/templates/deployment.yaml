@@ -51,7 +51,7 @@ spec:
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
             - name: DYNATRACE_ONEAGENT_VERSION
-              value: latest
+              value: 1.321.51.20250905-075429
             - name: DYNATRACE_SKIP_SSL_VERIFICATION
               value: "true"
           volumeMounts:
@@ -111,73 +111,44 @@ spec:
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  {{- if eq .Values.environment "preprod" }}
-                  name: dsarepreprodshowcase-rds
-                  {{- else }}
-                  name: dsaredevshowcase-rds
-                  {{- end }}
+                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
                   key: endpoint
             - name: SHOWCASE_SERVICES_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  {{- if eq .Values.environment "preprod" }}
-                  name: dsarepreprodshowcase-rds
-                  {{- else }}
-                  name: dsaredevshowcase-rds
-                  {{- end }}
+                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
                   key: port
             - name: SHOWCASE_SERVICES_DB_NAME
+              {{- if .Values.database.nameOverride }}
+              value: {{ .Values.database.nameOverride }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  {{- if eq .Values.environment "preprod" }}
-                  name: dsarepreprodshowcase-rds
-                  {{- else }}
-                  name: dsaredevshowcase-rds
-                  {{- end }}
+                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
                   key: default_db
+              {{- end }}
             - name: SHOWCASE_SERVICES_DB_USER
               valueFrom:
                 secretKeyRef:
-                  {{- if eq .Values.environment "preprod" }}
-                  name: dsarepreprodshowcase-rds
-                  {{- else }}
-                  name: dsaredevshowcase-rds
-                  {{- end }}
+                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
                   key: username
             - name: SHOWCASE_SERVICES_DB_PWD
               valueFrom:
                 secretKeyRef:
-                  {{- if eq .Values.environment "preprod" }}
-                  name: dsarepreprodshowcase-rds
-                  {{- else }}
-                  name: dsaredevshowcase-rds
-                  {{- end }}
+                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
                   key: password
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://$(SHOWCASE_SERVICES_DB_ENDPOINT):$(SHOWCASE_SERVICES_DB_PORT)/$(SHOWCASE_SERVICES_DB_NAME)"
-            {{- if eq .Values.environment "preprod" }}
-            - name: DYNATRACE_PROD_METRICS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-prod-metrics-ingest
-                  key: token
-            - name: DYNATRACE_PROD_METRICS_API_URL
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-prod-metrics-ingest
-                  key: api_url
-            {{- else }}
             - name: DYNATRACE_METRICS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
+                  name: {{ .Values.dynatrace.metricsSecretName | default "registration-service-dynatrace-metrics-ingest" }}
                   key: token
             - name: DYNATRACE_METRICS_API_URL
               valueFrom:
                 secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
+                  name: {{ .Values.dynatrace.metricsSecretName | default "registration-service-dynatrace-metrics-ingest" }}
                   key: api_url
-            {{- end }}
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
@@ -195,35 +166,24 @@ spec:
             - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
               mountPath: /opt/dynatrace/oneagent
           {{- end }}
-            - name: kafka-tls-storage
-              mountPath: /etc/kafka-tls
+            - name: bundle
+              mountPath: /etc/ssl/certs
+              readOnly: true
             - name: certs
               mountPath: /certs
+            - name: kafka-tls
+              mountPath: /etc/kafka-tls
               readOnly: true
       volumes:
-      {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
-        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
-          emptyDir: {}
-      {{- end }}
-        - name: kafka-tls-storage
-          persistentVolumeClaim:
-            claimName: showcase-storage-pvc
-        - name: certs
-          emptyDir: {}
-        - name: secrets
-          emptyDir: {}
         - name: bundle
           configMap:
             name: bundle
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: certs
+          emptyDir: {}
+        - name: kafka-tls
+          secret:
+            secretName: kafka-tls
+        {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+          emptyDir: {}
+        {{- end }}
