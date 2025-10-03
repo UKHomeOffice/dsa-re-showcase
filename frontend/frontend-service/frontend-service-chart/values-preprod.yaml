@@ -37,3 +37,6 @@ persistenceCredentialsSecretName: dsarepreprodshowcase-rds
 
 # Preprod-specific configuration
 environment: preprod
+
+ingress:
+  enabled: false
