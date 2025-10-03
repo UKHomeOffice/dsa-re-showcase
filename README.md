@@ -145,6 +145,59 @@ helm upgrade registration-service . --values=values-dev.yaml --namespace dsa-re-
 
 Make sure you have authenticated access to the Kubernetes cluster and have the necessary secrets (e.g., Kafka certificates, Postgres credentials) already set up before deploying. Refer to [Technical Onboarding Guide](https://confluence.dsa.homeoffice.gov.uk/display/SPS/Dynatrace+-+Technical+Onboarding+Guide) for access requirements.
 
+### Deploying to Preprod Environment
+
+To deploy all services to the preprod environment:
+
+#### Prerequisites
+- Access to ACP Kubernetes cluster
+- Helm 3.x installed
+- kubectl configured for preprod context
+
+#### Deployment Steps
+
+1. **Create namespace:**
+   ```bash
+   kubectl create namespace dsa-re-preprod --dry-run=client -o yaml | kubectl apply -f -
+   ```
+
+2. **Deploy Registration Service:**
+   ```bash
+   cd backend/registration-service/registration-service-chart
+   helm upgrade --install registration-service . \
+     --values=values-preprod.yaml \
+     --namespace dsa-re-preprod \
+     --wait
+   ```
+
+3. **Deploy Notification Service:**
+   ```bash
+   cd backend/notification-service/notification-service-chart
+   helm upgrade --install notification-service . \
+     --values=values-preprod.yaml \
+     --namespace dsa-re-preprod \
+     --wait
+   ```
+
+4. **Deploy Frontend Service:**
+   ```bash
+   cd frontend/frontend-service/frontend-service-chart
+   helm upgrade --install frontend-service . \
+     --values=values-preprod.yaml \
+     --namespace dsa-re-preprod \
+     --wait
+   ```
+
+5. **Deploy CronJob:**
+   ```bash
+   kubectl apply -f k8s/msk-cronjob-preprod.yaml
+   ```
+
+#### Verification
+Access the application at: `http://frontend-service.preprod.dsa-re-notprod.homeoffice.gov.uk/`
+
+All services will be monitored via Dynatrace with OneAgent pod runtime injection enabled.
+
 ---
 
 ## Accessing the Deployed Application
