@@ -34,7 +34,7 @@ spec:
       initContainers:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
-          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.3.4
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
           env:
             - name: DYNATRACE_API_URL
               valueFrom:
@@ -47,11 +47,9 @@ spec:
                   name: notification-service-dynatrace-oneagent
                   key: paas-installer-download-token
             - name: DYNATRACE_ONEAGENT_OPTIONS
-              value: flavor=multidistro&include=python&include=sdk
+              value: flavor=multidistro&include=python
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
-            - name: DYNATRACE_ONEAGENT_VERSION
-              value: "1.319.76.20250819-104206"
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
@@ -86,7 +84,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: POSTGRES_HOST
-              value: "notification-service-db.dsa-re-dev.svc.cluster.local"
+              value: "notification-service-db.dsa-re-preprod.svc.cluster.local"
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_DB
@@ -101,7 +99,11 @@ spec:
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: registration-service-dynatrace-prod-metrics-ingest
+                  {{- else }}
                   name: registration-service-dynatrace-metrics-ingest
+                  {{- end }}
                   key: token
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}
@@ -111,11 +113,18 @@ spec:
               value: {{ .Values.kafka.groupId }}
             - name: KAFKA_CERT_PATH
               value: {{ .Values.kafka.certPath }}
+          {{- if .Values.otlp }}
+            - name: OTLP_ENDPOINT
+              value: {{ .Values.otlp.endpoint }}
+            - name: DYNATRACE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.otlp.tokenSecret.name }}
+                  key: {{ .Values.otlp.tokenSecret.key }}
+          {{- end }}
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
-            - name: DT_NETWORK_ZONE
-              value: dsa-notprod-acp-notprod-rtg-00
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}

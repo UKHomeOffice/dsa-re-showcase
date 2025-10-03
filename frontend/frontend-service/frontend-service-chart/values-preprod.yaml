@@ -1,0 +1,43 @@
+namespaceToAllowEgress:
+  - dynatrace
+  - dynatrace-preprod
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+imagePullSecrets: []
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Preprod database credentials
+persistenceCredentialsSecretName: dsarepreprodshowcase-rds
+
+# Preprod-specific configuration
+environment: preprod
+
+ingress:
+  enabled: false
