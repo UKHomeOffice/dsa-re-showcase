@@ -50,6 +50,8 @@ spec:
               value: flavor=multidistro&include=nodejs
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
+            - name: DYNATRACE_SKIP_SSL_VERIFICATION
+              value: "true"
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
