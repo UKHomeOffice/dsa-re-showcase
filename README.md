@@ -194,7 +194,10 @@ To deploy all services to the preprod environment:
    ```
 
 #### Verification
-Access the application at: `http://frontend-service.preprod.dsa-re-notprod.homeoffice.gov.uk/`
+Verify deployment by checking pod status:
+```bash
+kubectl get pods -n dsa-re-preprod
+```
 
 All services will be monitored via Dynatrace with OneAgent pod runtime injection enabled.
 
