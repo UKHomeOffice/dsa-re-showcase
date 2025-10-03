@@ -194,10 +194,20 @@ To deploy all services to the preprod environment:
    ```
 
 #### Verification
-Verify deployment by checking pod status:
-```bash
-kubectl get pods -n dsa-re-preprod
-```
+
+1. **Check pod status:**
+   ```bash
+   kubectl get pods -n dsa-re-preprod
+   ```
+
+2. **Verify in Dynatrace:**
+   - Log into Dynatrace console
+   - Navigate to **Hosts & Processes** or **Services**
+   - Look for the preprod services:
+     - `registration-service` (Java/Spring Boot)
+     - `notification-service` (Python/FastAPI)
+     - `frontend-service` (React)
+   - All services should appear with OneAgent monitoring enabled
 
 All services will be monitored via Dynatrace with OneAgent pod runtime injection enabled.
 
