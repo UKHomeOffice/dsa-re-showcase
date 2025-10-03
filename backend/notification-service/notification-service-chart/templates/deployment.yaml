@@ -99,7 +99,11 @@ spec:
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if eq .Values.environment "preprod" }}
+                  name: registration-service-dynatrace-prod-metrics-ingest
+                  {{- else }}
                   name: registration-service-dynatrace-metrics-ingest
+                  {{- end }}
                   key: token
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}

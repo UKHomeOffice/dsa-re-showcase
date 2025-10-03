@@ -45,5 +45,5 @@ environment: preprod
 otlp:
   endpoint: "http://dynatrace-activegate-preprod.dynatrace-preprod.svc.cluster.local:9999/v1/metrics"
   tokenSecret:
-    name: "registration-service-dynatrace-oneagent"
-    key: "paas-installer-download-token"
+    name: "registration-service-dynatrace-prod-metrics-ingest"
+    key: "token"
