@@ -14,7 +14,25 @@ spec:
           matchLabels:
             name: ingress-internal
   egress:
-    - {}
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: {{ .Release.Namespace }}
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+    {{- range .Values.namespaceToAllowEgress }}
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: {{ . }}
+    {{- end }}
+    {{- range .Values.ipBlockToAllowEgress }}
+    - to:
+      - ipBlock:
+          cidr: {{ . }}
+    {{- end }}
   podSelector:
     matchLabels:
       {{- include "frontend-service.selectorLabels" . | nindent 6 }}
