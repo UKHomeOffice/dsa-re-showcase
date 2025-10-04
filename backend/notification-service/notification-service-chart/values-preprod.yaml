@@ -43,7 +43,7 @@ environment: preprod
 
 # OTLP configuration for Dynatrace metrics
 otlp:
-  endpoint: "http://dynatrace-activegate-preprod.dynatrace-preprod.svc.cluster.local:9999/v1/metrics"
+  endpoint: "https://dynatrace-activegate-preprod.dynatrace-preprod.svc.cluster.local/e/vir21829/api/v2/otlp/v1/metrics"
   tokenSecret:
     name: "registration-service-dynatrace-prod-metrics-ingest"
     key: "token"
