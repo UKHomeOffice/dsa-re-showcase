@@ -148,11 +148,17 @@ spec:
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
-                -Dspring.profiles.active={{ .Release.Namespace }}
+                -Dspring.profiles.active=default
                 -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
                 -Djavax.net.ssl.trustStorePassword=changeit
             - name: KAFKA_CONFIG
               value: "/etc/kafka-tls/client.properties"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers | quote }}
+            - name: SPRING_KAFKA_TOPIC_USER_LOGIN
+              value: {{ .Values.kafka.topics.userLogin | quote }}
+            - name: SPRING_KAFKA_TOPIC_USER_REGISTRATION
+              value: {{ .Values.kafka.topics.userRegistration | quote }}
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so

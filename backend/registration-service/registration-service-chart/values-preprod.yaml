@@ -35,6 +35,13 @@ resources:
 # Preprod-specific configuration
 environment: preprod
 
+# Kafka configuration - preprod MSK cluster
+kafka:
+  bootstrapServers: "b-1.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094,b-2.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094"
+  topics:
+    userLogin: "user-login"
+    userRegistration: "user-registration"
+
 # CronJob configuration
 cronjob:
   enabled: true
