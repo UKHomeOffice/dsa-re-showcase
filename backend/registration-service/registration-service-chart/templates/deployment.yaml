@@ -52,8 +52,6 @@ spec:
               value: /opt/dynatrace/oneagent
             - name: DYNATRACE_ONEAGENT_VERSION
               value: 1.321.51.20250905-075429
-            - name: DYNATRACE_SKIP_SSL_VERIFICATION
-              value: "true"
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
@@ -111,12 +109,12 @@ spec:
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
+                  name: {{ .Values.database.secretName }}
                   key: endpoint
             - name: SHOWCASE_SERVICES_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
+                  name: {{ .Values.database.secretName }}
                   key: port
             - name: SHOWCASE_SERVICES_DB_NAME
               {{- if .Values.database.nameOverride }}
@@ -124,30 +122,28 @@ spec:
               {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
+                  name: {{ .Values.database.secretName }}
                   key: default_db
               {{- end }}
             - name: SHOWCASE_SERVICES_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
+                  name: {{ .Values.database.secretName }}
                   key: username
             - name: SHOWCASE_SERVICES_DB_PWD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName | default "dsaredevshowcase-rds" }}
+                  name: {{ .Values.database.secretName }}
                   key: password
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://$(SHOWCASE_SERVICES_DB_ENDPOINT):$(SHOWCASE_SERVICES_DB_PORT)/$(SHOWCASE_SERVICES_DB_NAME)"
             - name: DYNATRACE_METRICS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dynatrace.metricsSecretName | default "registration-service-dynatrace-metrics-ingest" }}
+                  name: {{ .Values.dynatrace.metricsSecretName }}
                   key: token
             - name: DYNATRACE_METRICS_API_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.dynatrace.metricsSecretName | default "registration-service-dynatrace-metrics-ingest" }}
+                  name: {{ .Values.dynatrace.metricsSecretName }}
                   key: api_url
             - name: JAVA_OPTS
               value: >

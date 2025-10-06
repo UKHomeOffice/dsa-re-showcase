@@ -35,6 +35,11 @@ resources:
 # Preprod-specific configuration
 environment: preprod
 
+# CronJob configuration
+cronjob:
+  enabled: true
+  registrationServiceUrl: "http://registration-service.dsa-re-preprod.svc.cluster.local"
+
 # Database configuration
 database:
   secretName: dsareprprodshowcase-rds

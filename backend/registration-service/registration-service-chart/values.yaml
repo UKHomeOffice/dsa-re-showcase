@@ -59,6 +59,30 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+# Database configuration defaults
+database:
+  secretName: "dsaredevshowcase-rds"
+  nameOverride: ""
+
+# Dynatrace configuration defaults
+dynatrace:
+  metricsSecretName: "registration-service-dynatrace-metrics-ingest"
+  podRuntimeInjection:
+    enabled: false
+
+# Environment configuration
+environment: "dev"
+
+# CronJob configuration
+cronjob:
+  enabled: false
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  ttlSecondsAfterFinished: 30
+  image: "quay.io/ukhomeofficedigital/dsa-re-msk-cron:latest"
+  registrationServiceUrl: "http://registration-service.dsa-re-dev.svc.cluster.local"
 
 nodeSelector: {}
 
