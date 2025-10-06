@@ -72,6 +72,7 @@ database:
 
 # Dynatrace configuration defaults
 dynatrace:
+  networkZone: "dsa-notprod-acp-notprod-rtg-00"
   podRuntimeInjection:
     enabled: false
     volumeName: "oneagent"
