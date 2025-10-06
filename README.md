@@ -156,12 +156,7 @@ To deploy all services to the preprod environment:
 
 #### Deployment Steps
 
-1. **Create namespace:**
-   ```bash
-   kubectl create namespace dsa-re-preprod --dry-run=client -o yaml | kubectl apply -f -
-   ```
-
-2. **Deploy Registration Service:**
+1. **Deploy Registration Service:**
    ```bash
    cd backend/registration-service/registration-service-chart
    helm upgrade --install registration-service . \
@@ -170,7 +165,7 @@ To deploy all services to the preprod environment:
      --wait
    ```
 
-3. **Deploy Notification Service:**
+2. **Deploy Notification Service:**
    ```bash
    cd backend/notification-service/notification-service-chart
    helm upgrade --install notification-service . \
@@ -179,7 +174,7 @@ To deploy all services to the preprod environment:
      --wait
    ```
 
-4. **Deploy Frontend Service:**
+3. **Deploy Frontend Service:**
    ```bash
    cd frontend/frontend-service/frontend-service-chart
    helm upgrade --install frontend-service . \
@@ -188,7 +183,7 @@ To deploy all services to the preprod environment:
      --wait
    ```
 
-5. **Deploy CronJob:**
+4. **Deploy CronJob:**
    ```bash
    kubectl apply -f k8s/msk-cronjob-preprod.yaml
    ```
