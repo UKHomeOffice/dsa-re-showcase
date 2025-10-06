@@ -86,16 +86,16 @@ spec:
             - name: POSTGRES_HOST
               value: {{ .Values.database.host }}
             - name: POSTGRES_PORT
-              value: {{ .Values.database.port | default "5432" | quote }}
+              value: {{ .Values.database.port | quote }}
             - name: POSTGRES_DB
-              value: {{ .Values.database.name | default "db_logins" }}
+              value: {{ .Values.database.name }}
             - name: POSTGRES_USER
-              value: {{ .Values.database.user | default "postgres" }}
+              value: {{ .Values.database.user }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.passwordSecret.name | default "postgresql-secret" }}
-                  key: {{ .Values.database.passwordSecret.key | default "POSTGRES_PASSWORD" }}
+                  name: {{ .Values.database.passwordSecret.name }}
+                  key: {{ .Values.database.passwordSecret.key }}
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:

@@ -60,6 +60,15 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+# Database configuration defaults
+database:
+  host: ""
+  port: "5432"
+  name: "db_logins"
+  user: "postgres"
+  passwordSecret:
+    name: "postgresql-secret"
+    key: "POSTGRES_PASSWORD"
 
 nodeSelector: {}
 
