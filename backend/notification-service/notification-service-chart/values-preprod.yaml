@@ -41,6 +41,16 @@ kafka:
 # Preprod-specific configuration
 environment: preprod
 
+# Database configuration
+database:
+  host: "notification-service-db.dsa-re-preprod.svc.cluster.local"
+  port: "5432"
+  name: "db_logins"
+  user: "postgres"
+  passwordSecret:
+    name: "postgresql-secret"
+    key: "POSTGRES_PASSWORD"
+
 # OTLP configuration for Dynatrace metrics
 otlp:
   endpoint: "https://dynatrace-activegate-preprod.dynatrace-preprod.svc.cluster.local/e/vir21829/api/v2/otlp/v1/metrics"

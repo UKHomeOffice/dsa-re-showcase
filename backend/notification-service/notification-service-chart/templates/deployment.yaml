@@ -84,18 +84,18 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: POSTGRES_HOST
-              value: "notification-service-db.dsa-re-preprod.svc.cluster.local"
+              value: {{ .Values.database.host | default "notification-service-db.dsa-re-dev.svc.cluster.local" }}
             - name: POSTGRES_PORT
-              value: "5432"
+              value: {{ .Values.database.port | default "5432" | quote }}
             - name: POSTGRES_DB
-              value: "db_logins"
+              value: {{ .Values.database.name | default "db_logins" }}
             - name: POSTGRES_USER
-              value: "postgres"
+              value: {{ .Values.database.user | default "postgres" }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgresql-secret
-                  key: POSTGRES_PASSWORD
+                  name: {{ .Values.database.passwordSecret.name | default "postgresql-secret" }}
+                  key: {{ .Values.database.passwordSecret.key | default "POSTGRES_PASSWORD" }}
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
