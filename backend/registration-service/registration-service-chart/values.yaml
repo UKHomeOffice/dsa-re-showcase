@@ -70,6 +70,7 @@ dynatrace:
   networkZone: "dsa-notprod-acp-notprod-rtg-00"
   podRuntimeInjection:
     enabled: false
+    volumeName: "oneagent"
 
 # Environment configuration
 environment: "dev"

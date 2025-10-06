@@ -52,7 +52,7 @@ spec:
               value: /opt/dynatrace/oneagent
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
-              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
           resources:
             limits:
               cpu: 100m
@@ -128,7 +128,7 @@ spec:
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
-            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+            - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
               mountPath: /opt/dynatrace/oneagent
           {{- end }}
             - name: kafka-certs
@@ -136,7 +136,7 @@ spec:
               readOnly: true
       volumes:
       {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
-        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+        - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
           emptyDir: {}
       {{- end }}
         - name: kafka-certs

@@ -70,6 +70,12 @@ database:
     name: "postgresql-secret"
     key: "POSTGRES_PASSWORD"
 
+# Dynatrace configuration defaults
+dynatrace:
+  podRuntimeInjection:
+    enabled: false
+    volumeName: "oneagent"
+
 nodeSelector: {}
 
 tolerations: []

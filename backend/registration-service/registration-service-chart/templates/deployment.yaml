@@ -56,7 +56,7 @@ spec:
               value: 1.321.51.20250905-075429
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
-              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
         {{- end }}
         - name: configure-truststore
           image: "quay.io/ukhomeofficedigital/dsa-re-registration-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -169,7 +169,7 @@ spec:
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
-            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+            - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
               mountPath: /opt/dynatrace/oneagent
           {{- end }}
             - name: bundle
@@ -190,6 +190,6 @@ spec:
           secret:
             secretName: kafka-tls
         {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
-        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+        - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
           emptyDir: {}
         {{- end }}
