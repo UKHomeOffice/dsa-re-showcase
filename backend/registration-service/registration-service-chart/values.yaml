@@ -67,6 +67,7 @@ database:
 # Dynatrace configuration defaults
 dynatrace:
   metricsSecretName: "registration-service-dynatrace-metrics-ingest"
+  networkZone: "dsa-notprod-acp-notprod-rtg-00"
   podRuntimeInjection:
     enabled: false
 
