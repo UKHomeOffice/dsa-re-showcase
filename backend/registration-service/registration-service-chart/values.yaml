@@ -59,6 +59,39 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+# Database configuration defaults
+database:
+  secretName: "dsaredevshowcase-rds"
+  nameOverride: ""
+
+# Dynatrace configuration defaults
+dynatrace:
+  metricsSecretName: "registration-service-dynatrace-metrics-ingest"
+  networkZone: "dsa-notprod-acp-notprod-rtg-00"
+  podRuntimeInjection:
+    enabled: false
+    volumeName: "oneagent"
+
+# Environment configuration
+environment: "dev"
+
+# Kafka configuration
+kafka:
+  bootstrapServers: "b-1.dsaredevshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094,b-2.dsaredevshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094"
+  topics:
+    userLogin: "user-login"
+    userRegistration: "user-registration"
+
+# CronJob configuration
+cronjob:
+  enabled: false
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  ttlSecondsAfterFinished: 30
+  image: "quay.io/ukhomeofficedigital/dsa-re-msk-cron:latest"
+  registrationServiceUrl: "http://registration-service.dsa-re-dev.svc.cluster.local"
 
 nodeSelector: {}
 

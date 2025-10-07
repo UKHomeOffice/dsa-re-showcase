@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../dynatrace-oneagent-pod-runtime-injection"
+        },
+        {
+            "path": "../dsa-re-tools"
+        },
+        {
+            "path": "../dynatrace-helm-chart"
+        }
+    ]
+}

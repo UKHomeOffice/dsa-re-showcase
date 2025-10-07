@@ -1,0 +1,54 @@
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  type: ClusterIP
+  port: 80
+
+imagePullSecrets: []
+
+dynatrace:
+  podRuntimeInjection:
+    enabled: true
+  networkZone: "dsa-preprod-acp-prod-rtg-00"
+  metricsSecretName: registration-service-dynatrace-prod-metrics-ingest
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Preprod-specific configuration
+environment: preprod
+
+# Kafka configuration - preprod MSK cluster
+kafka:
+  bootstrapServers: "b-1.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094,b-2.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094"
+  topics:
+    userLogin: "user-login"
+    userRegistration: "user-registration"
+
+# CronJob configuration
+cronjob:
+  enabled: true
+  registrationServiceUrl: "http://registration-service.dsa-re-preprod.svc.cluster.local"
+
+# Database configuration
+database:
+  secretName: dsareprprodshowcase-rds
+  nameOverride: postgres  # Override for preprod due to secret data issue

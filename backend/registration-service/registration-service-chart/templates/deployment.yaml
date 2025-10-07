@@ -6,11 +6,11 @@ metadata:
     {{- include "registration-service.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "registration-service.selectorLabels" . | nindent 6 }}
-  strategy:
-    type: Recreate
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -36,7 +36,7 @@ spec:
       initContainers:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
-          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:latest
           env:
             - name: DYNATRACE_API_URL
               valueFrom:
@@ -52,9 +52,11 @@ spec:
               value: flavor=multidistro&include=java
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
+            - name: DYNATRACE_ONEAGENT_VERSION
+              value: 1.321.51.20250905-075429
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
-              name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+              name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
         {{- end }}
         - name: configure-truststore
           image: "quay.io/ukhomeofficedigital/dsa-re-registration-service:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -62,7 +64,7 @@ spec:
             - name: TRUSTSTORE_RUNTIME
               value: /certs
             - name: TRUSTSTORE_PASSWORD
-              value: changeit    
+              value: changeit
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -106,89 +108,88 @@ spec:
           env:
             - name: RANDOM
               value: {{ randAlphaNum 5 | quote }}
-            - name: DT_NETWORK_ZONE
-              value: dsa-notprod-acp-notprod-rtg-00
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: dsaredevshowcase-rds
+                  name: {{ .Values.database.secretName }}
                   key: endpoint
             - name: SHOWCASE_SERVICES_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: dsaredevshowcase-rds
+                  name: {{ .Values.database.secretName }}
                   key: port
             - name: SHOWCASE_SERVICES_DB_NAME
+              {{- if .Values.database.nameOverride }}
+              value: {{ .Values.database.nameOverride }}
+              {{- else }}
               valueFrom:
                 secretKeyRef:
-                  name: dsaredevshowcase-rds
+                  name: {{ .Values.database.secretName }}
                   key: default_db
+              {{- end }}
             - name: SHOWCASE_SERVICES_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: dsaredevshowcase-rds
+                  name: {{ .Values.database.secretName }}
                   key: username
             - name: SHOWCASE_SERVICES_DB_PWD
               valueFrom:
                 secretKeyRef:
-                  name: dsaredevshowcase-rds
+                  name: {{ .Values.database.secretName }}
                   key: password
             - name: DYNATRACE_METRICS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
+                  name: {{ .Values.dynatrace.metricsSecretName }}
                   key: token
             - name: DYNATRACE_METRICS_API_URL
               valueFrom:
                 secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
+                  name: {{ .Values.dynatrace.metricsSecretName }}
                   key: api_url
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
-                -Dspring.profiles.active={{ .Release.Namespace }}
+                -Dspring.profiles.active=default
                 -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
                 -Djavax.net.ssl.trustStorePassword=changeit
             - name: KAFKA_CONFIG
               value: "/etc/kafka-tls/client.properties"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers | quote }}
+            - name: SPRING_KAFKA_TOPIC_USER_LOGIN
+              value: {{ .Values.kafka.topics.userLogin | quote }}
+            - name: SPRING_KAFKA_TOPIC_USER_REGISTRATION
+              value: {{ .Values.kafka.topics.userRegistration | quote }}
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
+            - name: DT_NETWORK_ZONE
+              value: {{ .Values.dynatrace.networkZone | quote }}
           {{- end }}
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
-            - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
+            - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
               mountPath: /opt/dynatrace/oneagent
           {{- end }}
-            - name: kafka-tls-storage
-              mountPath: /etc/kafka-tls
+            - name: bundle
+              mountPath: /etc/ssl/certs
+              readOnly: true
             - name: certs
               mountPath: /certs
+            - name: kafka-tls
+              mountPath: /etc/kafka-tls
               readOnly: true
       volumes:
-      {{- if ((.Values.dynatrace).podRuntimeInjection).enabled }}
-        - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
-          emptyDir: {}
-      {{- end }}
-        - name: kafka-tls-storage
-          persistentVolumeClaim:
-            claimName: showcase-storage-pvc
-        - name: certs
-          emptyDir: {}
-        - name: secrets
-          emptyDir: {}
         - name: bundle
           configMap:
             name: bundle
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: certs
+          emptyDir: {}
+        - name: kafka-tls
+          secret:
+            secretName: kafka-tls
+        {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
+        - name: {{ .Values.dynatrace.podRuntimeInjection.volumeName }}
+          emptyDir: {}
+        {{- end }}
