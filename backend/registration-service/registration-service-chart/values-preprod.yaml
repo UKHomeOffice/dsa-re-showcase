@@ -1,3 +1,3 @@
 ---
 dynatrace:
-  networkZone: "dsa-preprod-acp-notprod-rtg-00"
+  networkZone: "dsa-preprod-acp-prod-rtg-00"
