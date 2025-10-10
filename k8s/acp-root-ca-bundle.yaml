@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bundle
+  namespace: dev
+data:
+  acp-root.crt: |
+    -----BEGIN CERTIFICATE-----
+    # ACP Root CA Certificate content would go here
+    # This needs to be obtained from the dev namespace or your certificate authority
+    -----END CERTIFICATE-----

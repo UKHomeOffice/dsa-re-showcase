@@ -33,3 +33,6 @@ kafka:
   groupId: "notification-service"
   certPath: "/etc/kafka-certs"
 
+postgres:
+  host: "notification-service-db.dsa-re-dev.svc.cluster.local"
+
