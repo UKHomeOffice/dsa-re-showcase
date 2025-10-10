@@ -69,6 +69,3 @@ affinity: {}
 
 dynatrace:
   networkZone: "default"
-
-postgres:
-  host: "notification-service-db"
