@@ -107,7 +107,7 @@ spec:
             - name: RANDOM
               value: {{ randAlphaNum 5 | quote }}
             - name: DT_NETWORK_ZONE
-              value: dsa-notprod-acp-notprod-rtg-00
+              value: {{ .Values.dynatrace.networkZone }}
             - name: SHOWCASE_SERVICES_DB_ENDPOINT
               valueFrom:
                 secretKeyRef:
