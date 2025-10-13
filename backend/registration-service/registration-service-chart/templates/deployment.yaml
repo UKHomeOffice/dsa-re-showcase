@@ -156,7 +156,7 @@ spec:
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
           {{- end }}
             - name: DT_CUSTOM_PROP
-              value: corecloud.homeoffice.gov.uk/project-id=dsa
+              value: project-id=dsa
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
