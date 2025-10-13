@@ -1,6 +1,3 @@
 --- 
 dynatrace:
   networkZone: "dsa-preprod-acp-prod-rtg-00"
-
-postgres:
-  host: "frontend-service-db.dsa-re-preprod.svc.cluster.local"

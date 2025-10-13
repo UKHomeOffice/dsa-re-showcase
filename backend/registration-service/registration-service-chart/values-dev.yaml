@@ -25,7 +25,4 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-postgres:
-  host: "registration-service-db.dsa-re-dev.svc.cluster.local"
-
 

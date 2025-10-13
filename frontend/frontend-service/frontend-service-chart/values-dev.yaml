@@ -28,6 +28,3 @@ image:
 
 # DO WE NEED THIS FOR FRONTEND?
 persistenceCredentialsSecretName: dsaredevshowcase-rds
-
-postgres:
-  host: "frontend-service-db.dsa-re-dev.svc.cluster.local"
