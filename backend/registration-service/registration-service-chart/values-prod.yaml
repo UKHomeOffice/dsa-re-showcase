@@ -1,3 +1,6 @@
 ---
 dynatrace:
   networkZone: "dsa-prod-acp-prod-rtg-00"
+
+postgres:
+  host: "registration-service-db.dsa-re-prod.svc.cluster.local"
