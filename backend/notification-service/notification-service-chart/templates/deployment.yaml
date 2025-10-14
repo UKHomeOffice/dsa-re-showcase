@@ -86,7 +86,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: POSTGRES_HOST
-              value: "notification-service-db.dsa-re-dev.svc.cluster.local"
+              value: {{ .Values.postgres.host }}
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_DB
