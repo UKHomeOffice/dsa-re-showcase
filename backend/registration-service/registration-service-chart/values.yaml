@@ -15,7 +15,8 @@ serviceAccount:
   name: ""
 
 podAnnotations: {}
-podLabels: {}
+podLabels:
+  project-id: dsa
 
 podSecurityContext: {}
   # fsGroup: 2000
