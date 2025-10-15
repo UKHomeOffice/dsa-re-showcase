@@ -36,7 +36,7 @@ spec:
       initContainers:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
-          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.0.0
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.3.4
           env:
             - name: DYNATRACE_API_URL
               valueFrom:
@@ -155,6 +155,8 @@ spec:
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so
           {{- end }}
+            - name: DT_CUSTOM_PROP
+              value: project-id=dsa
           volumeMounts:
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
