@@ -1,3 +1,28 @@
 ---
-dynatrace:
-  networkZone: "dsa-prod-acp-prod-rtg-00"
+# namespaceToAllowEgress:
+#   - dynatrace
+
+# ipBlockToAllowEgress: []
+
+# serviceAccount:
+#   create: true
+#   automount: true
+#   annotations: {}
+#   name: "dynatrace-oneagent-metadata-viewer"
+
+# service:
+#   type: ClusterIP
+#   port: 80
+
+# imagePullSecrets: []
+
+
+# dynatrace:
+#   podRuntimeInjection:
+#     enabled: true
+#   networkZone: "dsa-prod-acp-prod-rtg-00"
+
+# image:
+#   pullPolicy: Always
+#   # Overrides the image tag whose default is the chart appVersion.
+#   tag: "latest"
