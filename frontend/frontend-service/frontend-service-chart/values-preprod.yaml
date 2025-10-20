@@ -7,4 +7,4 @@ dynatrace:
     enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"
 
-persistenceCredentialsSecretName: dsaredevshowcase-rds
+persistenceCredentialsSecretName: dsarepreprodshowcase-rds
