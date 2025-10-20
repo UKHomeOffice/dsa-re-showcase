@@ -1,7 +1,4 @@
 ---
-serviceAccount:
-  name: "dynatrace-oneagent-metadata-viewer"
-
 dynatrace:
   podRuntimeInjection:
     enabled: true

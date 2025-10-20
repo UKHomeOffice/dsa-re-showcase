@@ -12,7 +12,7 @@ serviceAccount:
   create: false
   automount: true
   annotations: {}
-  name: ""
+  name: "dynatrace-oneagent-metadata-viewer"
 
 podAnnotations: {}
 podLabels: {}
