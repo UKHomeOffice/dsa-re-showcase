@@ -1,3 +1,20 @@
 ---
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: true
+  name: "dynatrace-oneagent-metadata-viewer"
+
+service:
+  port: 80
+
 dynatrace:
+  podRuntimeInjection:
+    enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"
+
+image:
+  pullPolicy: Always
