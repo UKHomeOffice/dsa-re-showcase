@@ -1,9 +1,4 @@
 ---
-namespaceToAllowEgress:
-  - dynatrace
-
-ipBlockToAllowEgress: []
-
 serviceAccount:
   name: "dynatrace-oneagent-metadata-viewer"
 
