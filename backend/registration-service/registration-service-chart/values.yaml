@@ -57,7 +57,7 @@ autoscaling:
 
 image:
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "1.3.4"
 
 
 nodeSelector: {}

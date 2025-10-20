@@ -60,6 +60,9 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+image:
+  pullPolicy: IfNotPresent
+  tag: "1.3.4"
 
 nodeSelector: {}
 
