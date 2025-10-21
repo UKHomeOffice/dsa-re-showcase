@@ -6,3 +6,8 @@ dynatrace:
   podRuntimeInjection:
     enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"
+
+image:
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
