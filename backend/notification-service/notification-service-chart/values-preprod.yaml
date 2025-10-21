@@ -4,11 +4,6 @@ dynatrace:
     enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"
 
-image:
-  pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
-
 kafka:
   bootstrapServers: "b-1.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094,b-2.dsarepreprodshowcase.rfkas2.c2.kafka.eu-west-2.amazonaws.com:9094"
   topic: "user-login"
