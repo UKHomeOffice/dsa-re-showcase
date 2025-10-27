@@ -12,7 +12,7 @@ serviceAccount:
   create: false
   automount: true
   annotations: {}
-  name: ""
+  name: "dynatrace-oneagent-metadata-viewer"
 
 podAnnotations: {}
 podLabels: {}
@@ -57,7 +57,8 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 image:
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 

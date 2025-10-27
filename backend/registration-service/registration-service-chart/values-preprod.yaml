@@ -1,3 +1,8 @@
 ---
+serviceAccount:
+  create: true
+
 dynatrace:
+  podRuntimeInjection:
+    enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"

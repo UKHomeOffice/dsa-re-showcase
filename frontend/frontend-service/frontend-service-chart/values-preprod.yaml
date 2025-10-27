@@ -1,3 +1,7 @@
---- 
+---
 dynatrace:
+  podRuntimeInjection:
+    enabled: true
   networkZone: "dsa-preprod-acp-prod-rtg-00"
+
+persistenceCredentialsSecretName: dsarepreprodshowcase-rds
