@@ -28,9 +28,7 @@ logging.info("This is an OpenTelemetry log record!")
 os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 
 OTLP_ENDPOINT = os.getenv(
-    "OTLP_ENDPOINT",
-    "https://dynatrace-activegate-notprod-testing.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1"
-)
+    "OTLP_ENDPOINT")
 
 DYNATRACE_PAAS_TOKEN = os.getenv("DYNATRACE_PAAS_TOKEN")
 DYNATRACE_LOGS_TOKEN = os.getenv("DYNATRACE_LOGS_TOKEN")

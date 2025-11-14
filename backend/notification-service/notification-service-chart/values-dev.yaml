@@ -36,3 +36,5 @@ kafka:
 postgres:
   host: "notification-service-db.dsa-re-dev.svc.cluster.local"
 
+otlp:
+  OTLP_ENDPOINT: "https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1"

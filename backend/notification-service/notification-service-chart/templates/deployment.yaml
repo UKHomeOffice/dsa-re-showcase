@@ -108,6 +108,8 @@ spec:
                 secretKeyRef:
                   name: notification-service-dynatrace-inject-logs
                   key: logs-inject-token
+            - name: OTLP_ENDPOINT
+              value: {{ .Values.otlp.OTLP_ENDPOINT }}
             - name: KAFKA_SERVERS
               value: {{ .Values.kafka.bootstrapServers }}
             - name: KAFKA_TOPIC
