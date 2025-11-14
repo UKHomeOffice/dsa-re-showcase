@@ -66,3 +66,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+dynatrace:
+  networkZone: "default"

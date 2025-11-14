@@ -1,0 +1,3 @@
+---
+dynatrace:
+  networkZone: "dsa-preprod-acp-prod-rtg-00"

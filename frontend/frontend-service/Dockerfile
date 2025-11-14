@@ -1,5 +1,5 @@
 # Build react app
-FROM quay.io/ukhomeofficedigital/dsa-re-node-18-alpine:18-alpine3.19 AS builder
+FROM quay.io/ukhomeofficedigital/dsa-re-node:18-alpine3.20 AS builder
 
 #Set working directory
 WORKDIR /app

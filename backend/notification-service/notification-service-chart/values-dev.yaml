@@ -18,6 +18,8 @@ imagePullSecrets: []
 dynatrace:
   podRuntimeInjection:
     enabled: true
+  networkZone: "dsa-notprod-acp-notprod-rtg-00"
+  
 
 image:
   pullPolicy: Always
@@ -30,4 +32,7 @@ kafka:
   topic: "user-login"
   groupId: "notification-service"
   certPath: "/etc/kafka-certs"
+
+postgres:
+  host: "notification-service-db.dsa-re-dev.svc.cluster.local"
 

@@ -1,0 +1,6 @@
+---
+dynatrace:
+  networkZone: "dsa-prod-acp-prod-rtg-00"
+
+postgres:
+  host: "notification-service-db.dsa-re-prod.svc.cluster.local"

@@ -49,7 +49,17 @@ This repository contains the Registration microservice for the Showcase Services
    mvn clean install
    ```
 
-## Running the Application
+## Running the Application Locally
+
+Note to run the application locally there is a prerequisite on having a PostgreSQL accessible to the app
+
+- Make sure to create a database and user in PostgreSQL with the necessary privileges.
+- Update the `application.properties` file with your database connection settings, such as:
+  ```properties
+  spring.datasource.url=jdbc:postgresql://localhost:5432/yourdbname
+  spring.datasource.username=yourusername
+  spring.datasource.password=yourpassword
+  ```
 
 1. **Start the application**:
 
@@ -59,6 +69,17 @@ This repository contains the Registration microservice for the Showcase Services
 
 2. **Access the API**:
    - The application will be running at `http://localhost:8080`.
+
+## Deploying via Helm
+
+At time of writing there is no pipeline-based Helm deployment. Deployments are done 'by hand' by executing the following command from within the charts directory:
+
+```
+helm -n dsa-re-dev upgrade registration-service . --values=values-dev.yaml
+```
+
+Remember that by deploying changes from locally branches you are potentially diverging what is deployed from the main branch.
+
 
 ## API Endpoints
 
@@ -87,23 +108,7 @@ This repository contains the Registration microservice for the Showcase Services
   }
   ```
 
-## Database Setup
 
-- Make sure to create a database and user in PostgreSQL with the necessary privileges.
-- Update the `application.properties` file with your database connection settings, such as:
-  ```properties
-  spring.datasource.url=jdbc:postgresql://localhost:5432/yourdbname
-  spring.datasource.username=yourusername
-  spring.datasource.password=yourpassword
-  ```
-### Containerised PostgreSQL
-
-For the purposes of getting up and running while a RDS instance was provisioned, a containerised version of PostgreSQL was deployed to the dsa-re-dev namespace using Helm and [an off-the-shelf Chart from bitnami](https://artifacthub.io/packages/helm/bitnami/postgresql). The values file for this can be found [here](./containerised-db-values-dev.yaml), and this was deployed as below:
-
-```bash
-$ helm repo add bitnami https://charts.bitnami.com/bitnami # Adds repo to the local Helm client
-$ helm install registration-service-postgresql bitnami/postgresql --version 16.0.4 --values=containerised-db-values-dev.yaml
-```
 
 ## Contributing
 

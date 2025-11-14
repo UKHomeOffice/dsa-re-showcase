@@ -19,6 +19,7 @@ imagePullSecrets: []
 dynatrace:
   podRuntimeInjection:
     enabled: true
+  networkZone: "dsa-notprod-acp-notprod-rtg-00"
 
 image:
   pullPolicy: Always
