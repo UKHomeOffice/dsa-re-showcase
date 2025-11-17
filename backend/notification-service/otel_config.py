@@ -60,7 +60,7 @@ set_logger_provider(logger_provider)
 log_exporter = OTLPLogExporter(
     endpoint=f"{OTLP_ENDPOINT}/logs",
     headers={"Authorization": f"Api-Token {DYNATRACE_LOGS_TOKEN}"},
-    insecure=True  # Set to False if using HTTPS with a valid certificate
+    insecure=False  # Set to False if using HTTPS with a valid certificate
 )
 logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
 
