@@ -80,8 +80,7 @@ logger_provider.add_log_record_processor(
     BatchLogRecordProcessor(
         OTLPLogExporter(
             endpoint=f"{DT_API_URL}/v1/logs",
-            headers={"Authorization": f"Api-Token {DT_API_TOKEN}"},
-            insecure=False
+            headers={"Authorization": f"Api-Token {DT_API_TOKEN}"}
         )
     )
 )
