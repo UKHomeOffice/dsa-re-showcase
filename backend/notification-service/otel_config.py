@@ -1,76 +1,113 @@
+# otlp_config.py
 import os
+import json
 import logging
-from opentelemetry import metrics
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+# Exporters
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+
+# Traces
+from opentelemetry.sdk.trace import TracerProvider, sampling
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace import set_tracer_provider
+
+# Metrics
+from opentelemetry.sdk.metrics import MeterProvider, Counter, UpDownCounter, Histogram, ObservableCounter, ObservableUpDownCounter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader, AggregationTemporality
+from opentelemetry.metrics import set_meter_provider
+
+# Logs
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor, ConsoleLogExporter
-from opentelemetry._logs import set_logger_provider, get_logger
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
-
-provider = LoggerProvider()
-processor = BatchLogRecordProcessor(ConsoleLogExporter())
-provider.add_log_record_processor(processor)
-# Sets the global default logger provider
-set_logger_provider(provider)
-
-logger = get_logger(__name__)
-
-handler = LoggingHandler(level=logging.INFO, logger_provider=provider)
-logging.basicConfig(handlers=[handler], level=logging.INFO)
-
-logging.info("This is an OpenTelemetry log record!")
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry._logs import set_logger_provider
 
 
-# Set the CA certificate path via an environment variable
-os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
+def init_telemetry():
 
-OTLP_ENDPOINT = os.getenv(
-    "OTLP_ENDPOINT")
+    # -------------------------------
+    # Environment
+    # -------------------------------
+    DT_API_URL = os.getenv("OTLP_ENDPOINT")      
+    DT_API_TOKEN = os.getenv("DYNATRACE_LOGS_TOKEN")
+    DYNATRACE_PAAS_TOKEN = os.getenv("DYNATRACE_PAAS_TOKEN")
 
-DYNATRACE_PAAS_TOKEN = os.getenv("DYNATRACE_PAAS_TOKEN")
-DYNATRACE_LOGS_TOKEN = os.getenv("DYNATRACE_LOGS_TOKEN")
+    os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
 
-# Initialize OpenTelemetry Metric Exporter
-metric_exporter = OTLPMetricExporter(
-    endpoint=f"{OTLP_ENDPOINT}/metrics",
-    headers={
-        "Authorization": f"Api-Token {DYNATRACE_PAAS_TOKEN}",
-        "Content-Type": "application/x-protobuf"
-    },
-)
+    # -------------------------------
+    # Resource metadata (Dynatrace)
+    # -------------------------------
+    merged = {}
 
-# Set up the MeterProvider with the Metric Exporter
-metric_reader = PeriodicExportingMetricReader(metric_exporter)
-meter_provider = MeterProvider(metric_readers=[metric_reader])
-metrics.set_meter_provider(meter_provider)
+    for name in [
+        "/var/lib/dynatrace/enrichment/dt_metadata.json",
+        "/var/lib/dynatrace/enrichment/dt_host_metadata.json",
+    ]:
+        try:
+            with open(name) as f:
+                merged.update(json.load(f))
+        except:
+            pass
 
-# Get a reusable meter instance
-meter = metrics.get_meter("notification-service")
+    merged.update({
+        "service.name": "notification-service",
+        "service.version": "1.0.0",
+        "service.namespace": "dsa-re-dev"
+    })
 
-# 1. Set up OpenTelemetry LoggerProvider
-logger_provider = LoggerProvider(
-    resource=Resource.create({"service.name": "notification-service"})
-)
-set_logger_provider(logger_provider)
+    resource = Resource.create(merged)
 
-# 2. Add a log processor with OTLP exporter
-log_exporter = OTLPLogExporter(
-    endpoint=f"{OTLP_ENDPOINT}/logs",
-    headers={"Authorization": f"Api-Token {DYNATRACE_LOGS_TOKEN}"},
-    insecure=False  # Set to False if using HTTPS with a valid certificate
-)
-logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
 
-# 3. Hook into Python's logging module
-logging_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging_handler],
-)
+    # -------------------------------
+    # Metrics
+    # -------------------------------
+    metric_exporter = OTLPMetricExporter(
+        endpoint=f"{DT_API_URL}/v1/metrics",
+        headers={"Authorization": f"Api-Token {DYNATRACE_PAAS_TOKEN}"},
+        preferred_temporality={
+            Counter: AggregationTemporality.DELTA,
+            UpDownCounter: AggregationTemporality.CUMULATIVE,
+            Histogram: AggregationTemporality.DELTA,
+            ObservableCounter: AggregationTemporality.DELTA,
+            ObservableUpDownCounter: AggregationTemporality.CUMULATIVE,
+        }
+    )
 
-# 4. Create a reusable logger instance
-otel_logger = logging.getLogger("notification-service")
+    metric_reader = PeriodicExportingMetricReader(metric_exporter)
+    meter_provider = MeterProvider(
+        metric_readers=[metric_reader],
+        resource=resource
+    )
+    set_meter_provider(meter_provider)
+
+    # -------------------------------
+    # Logging
+    # -------------------------------
+    logger_provider = LoggerProvider(resource=resource)
+    set_logger_provider(logger_provider)
+
+    logger_provider.add_log_record_processor(
+        BatchLogRecordProcessor(
+            OTLPLogExporter(
+                endpoint=f"{DT_API_URL}/v1/logs",
+                headers={"Authorization": f"Api-Token {DT_API_TOKEN}"},
+                insecure=False
+            )
+        )
+    )
+
+    otel_handler = LoggingHandler(
+        level=logging.INFO,
+        logger_provider=logger_provider
+    )
+
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[otel_handler],
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    logging.getLogger("init").info("OpenTelemetry for Dynatrace initialized.")
