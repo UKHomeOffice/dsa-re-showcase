@@ -1,16 +1,15 @@
 from fastapi import FastAPI
 import os
-import logging
 from datetime import datetime
 import asyncio
 from kafka_consumer import start_consumer
 import oneagent
 import oneagent.sdk
 from db import initialize_db, test_db_connection
-from otel_config import logging
+from otel_config import otel_logger
 
 # Use the OpenTelemetry logger
-logger = logging
+logger = otel_logger
 
 
 # Initialize the database

@@ -78,8 +78,13 @@ logger_provider.add_log_record_processor(
     headers = {"Authorization": "Api-Token " + DT_API_TOKEN}
   ))
 )
-handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+# 3. Hook into Python's logging module
+logging_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging_handler],
+)
 
-# Attach OTLP handler to root logger
-logging.getLogger().addHandler(handler)
-logging.info("Logging is set up")
+# 4. Create a reusable logger instance
+otel_logger = logging.getLogger("notification-service")
