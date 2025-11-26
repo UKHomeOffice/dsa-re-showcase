@@ -1,0 +1,31 @@
+namespaceToAllowEgress:
+  - dynatrace
+
+ipBlockToAllowEgress: []
+
+serviceAccount:
+  create: false
+  automount: true
+  name: "default"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+imagePullSecrets: []
+
+image:
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Environment-specific configuration
+environment: dev
+watchNamespace: dsa-re-dev

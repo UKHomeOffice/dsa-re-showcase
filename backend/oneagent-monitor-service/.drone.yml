@@ -1,0 +1,26 @@
+kind: pipeline
+type: kubernetes
+name: oneagent-monitor-service-build
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: backend/oneagent-monitor-service/Dockerfile
+      registry: quay.io
+      context: backend/oneagent-monitor-service
+      tags:
+      - latest
+      repo: quay.io/ukhomeofficedigital/dsa-re-oneagent-monitor
+      username:
+        from_secret: ROBOT_QUAY_USER
+      password:
+        from_secret: ROBOT_QUAY_PASS
+
+trigger:
+  event:
+  - push
