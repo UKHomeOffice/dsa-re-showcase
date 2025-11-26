@@ -37,10 +37,10 @@ Uses the `default` service account with existing `default-sa-role` RoleBinding t
 
 ## Metrics
 
-### Custom Metric: `dsa.re.oneagent.pod.uninstrumented`
+### Custom Metric: `ho.re.oneagent.pod.uninstrumented`
 - **Type**: Counter (sent when uninstrumented pod detected)
 
-### Gauge Metric: `dsa.re.oneagent.pods.uninstrumented.gauge`
+### Gauge Metric: `ho.re.oneagent.pods.uninstrumented.gauge`
 - **Type**: Gauge (current count of uninstrumented pods)
 - **Frequency**: Every 60 seconds
 - **Dimensions**: `namespace`

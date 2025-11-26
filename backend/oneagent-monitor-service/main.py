@@ -32,7 +32,7 @@ class OneAgentMonitor:
             "unit": "Count",
             "dimensions": ["pod_name", "namespace", "uninstrumented_type"],
             "series": [{
-                "metricKey": "dsa.re.oneagent.pod.uninstrumented",
+                "metricKey": "ho.re.oneagent.pod.uninstrumented",
                 "dataPoints": [{
                     "timestamp": int(time.time() * 1000),
                     "value": 1,
@@ -64,7 +64,7 @@ class OneAgentMonitor:
             "unit": "Count",
             "dimensions": ["namespace"],
             "series": [{
-                "metricKey": "dsa.re.oneagent.pods.uninstrumented.gauge",
+                "metricKey": "ho.re.oneagent.pods.uninstrumented.gauge",
                 "dataPoints": [{
                     "timestamp": int(time.time() * 1000),
                     "value": len(self.uninstrumented_pods),
