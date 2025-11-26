@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "path": "backend"
+        },
+        {
+            "path": "frontend"
+        },
+        {
+            "path": "images"
+        },
+        {
+            "path": "k8s"
+        },
+        {
+            "path": "."
+        },
+        {
+            "path": "../dynatrace-oneagent-pod-runtime-injection"
+        }
+    ],
+    "settings": {
+        "java.compile.nullAnalysis.mode": "automatic"
+    }
+}

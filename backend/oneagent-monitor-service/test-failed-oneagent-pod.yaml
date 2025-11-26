@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: failed-oneagent-pod
+  namespace: dsa-re-dev
+  labels:
+    app: failed-oneagent-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: failed-oneagent-pod
+  template:
+    metadata:
+      labels:
+        app: failed-oneagent-pod
+    spec:
+      # OneAgent init container with invalid token to cause failure
+      initContainers:
+      - image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:latest
+        name: oneagent-init-container
+        imagePullPolicy: Always
+        env:
+          - name: DYNATRACE_API_URL
+            value: https://dynatrace-activegate-notprod-testing.dynatrace.svc.cluster.local/e/ewo35763/api
+          - name: DYNATRACE_ONEAGENT_OPTIONS
+            value: flavor=multidistro&include=java
+          - name: DYNATRACE_PAAS_TOKEN
+            value: "invalid-token-to-cause-failure"  # Invalid token
+          - name: DYNATRACE_INSTALL_DIR
+            value: /opt/dynatrace/oneagent
+          - name: DYNATRACE_NETWORK_ZONE
+            value: dsa-notprod-acp-notprod-00
+        volumeMounts:
+        - name: oneagent 
+          mountPath: /opt/dynatrace/oneagent
+      containers:
+        - name: test-app
+          image: quay.io/ukhomeofficedigital/alpine:v3.15
+          command:
+            - /bin/sh
+            - "-c"
+            - "echo 'Running with failed OneAgent installation'; sleep 3600"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - mountPath: /opt/dynatrace/oneagent
+              name: oneagent
+      volumes:
+        - name: oneagent
+          emptyDir: {}
+      restartPolicy: Always

@@ -37,16 +37,23 @@ Uses the `default` service account with existing `default-sa-role` RoleBinding t
 
 ## Metrics
 
-### Custom Metric: `dsa.re.oneagent.pod.failure`
+### Custom Metric: `dsa.re.oneagent.pod.uninstrumented`
+- **Type**: Counter (sent when uninstrumented pod detected)
+
+### Gauge Metric: `dsa.re.oneagent.pods.uninstrumented.gauge`
+- **Type**: Gauge (current count of uninstrumented pods)
+- **Frequency**: Every 60 seconds
+- **Dimensions**: `namespace`
 - **Type**: Counter
 - **Dimensions**: 
-  - `pod_name` - Name of the failed pod
+  - `pod_name` - Name of the uninstrumented pod
   - `namespace` - Kubernetes namespace
-  - `failure_type` - Type of failure detected
+  - `uninstrumented_type` - Type of instrumentation issue detected
 
-### Failure Types Detected
-- `init_container_failed` - OneAgent init container exited with non-zero code
-- `init_container_error` - OneAgent init container in error state
+### Uninstrumented Types Detected
+- `no_oneagent_init_container` - Pod has no OneAgent init container configured
+- `oneagent_download_failed` - OneAgent init container failed (non-zero exit code)
+- `oneagent_init_error` - OneAgent init container in error/waiting state
 
 ## Endpoints
 

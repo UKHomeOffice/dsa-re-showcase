@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uninstrumented-pod
+  namespace: dsa-re-dev
+  labels:
+    app: uninstrumented-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uninstrumented-pod
+  template:
+    metadata:
+      labels:
+        app: uninstrumented-pod
+    spec:
+      # Deliberately NO initContainers - no OneAgent installation
+      containers:
+        - name: test-app
+          image: quay.io/ukhomeofficedigital/alpine:v3.15
+          command:
+            - /bin/sh
+            - "-c"
+            - "echo 'Running without OneAgent instrumentation'; sleep 3600"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+      restartPolicy: Always
