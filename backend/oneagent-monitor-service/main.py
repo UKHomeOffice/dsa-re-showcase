@@ -27,63 +27,40 @@ class OneAgentMonitor:
         
     def send_metric(self, pod_name, namespace, uninstrumented_type):
         """Send uninstrumented pod metric to Dynatrace"""
-        metric_data = {
-            "displayName": "Uninstrumented Pods",
-            "unit": "Count",
-            "dimensions": ["pod_name", "namespace", "uninstrumented_type"],
-            "series": [{
-                "metricKey": "ho.re.oneagent.pod.uninstrumented",
-                "dataPoints": [{
-                    "timestamp": int(time.time() * 1000),
-                    "value": 1,
-                    "dimensions": {
-                        "pod_name": pod_name,
-                        "namespace": namespace,
-                        "uninstrumented_type": uninstrumented_type
-                    }
-                }]
-            }]
-        }
+        timestamp = int(time.time() * 1000)
+        metric_lines = f"ho.re.oneagent.pod.uninstrumented,pod_name={pod_name},namespace={namespace},uninstrumented_type={uninstrumented_type} 1 {timestamp}"
         
         headers = {
             "Authorization": f"Api-Token {self.dt_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "text/plain; charset=utf-8"
         }
         
         try:
-            response = requests.post(f"{self.dt_api_url}/v2/metrics/ingest", 
-                                   json=metric_data, headers=headers)
+            response = requests.post(self.dt_api_url, 
+                                   data=metric_lines, headers=headers, verify=False)
             logger.info(f"Metric sent for {pod_name}: {response.status_code}")
+            if response.status_code == 202:
+                logger.info(f"SUCCESS: Uninstrumented pod metric sent for {pod_name}")
         except Exception as e:
             logger.error(f"Failed to send metric: {e}")
     
     def send_gauge_metric(self):
         """Send gauge metric with current count of uninstrumented pods"""
-        metric_data = {
-            "displayName": "Uninstrumented Pods Gauge",
-            "unit": "Count",
-            "dimensions": ["namespace"],
-            "series": [{
-                "metricKey": "ho.re.oneagent.pods.uninstrumented.gauge",
-                "dataPoints": [{
-                    "timestamp": int(time.time() * 1000),
-                    "value": len(self.uninstrumented_pods),
-                    "dimensions": {
-                        "namespace": self.watch_namespace
-                    }
-                }]
-            }]
-        }
+        timestamp = int(time.time() * 1000)
+        count = len(self.uninstrumented_pods)
+        metric_lines = f"ho.re.oneagent.pods.uninstrumented.gauge,namespace={self.watch_namespace} {count} {timestamp}"
         
         headers = {
             "Authorization": f"Api-Token {self.dt_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "text/plain; charset=utf-8"
         }
         
         try:
-            response = requests.post(f"{self.dt_api_url}/v2/metrics/ingest", 
-                                   json=metric_data, headers=headers)
-            logger.info(f"Gauge metric sent: {len(self.uninstrumented_pods)} uninstrumented pods")
+            response = requests.post(self.dt_api_url, 
+                                   data=metric_lines, headers=headers, verify=False)
+            logger.info(f"Gauge metric sent: {count} uninstrumented pods - Status: {response.status_code}")
+            if response.status_code == 202:
+                logger.info(f"SUCCESS: Gauge metric sent with {count} uninstrumented pods")
         except Exception as e:
             logger.error(f"Failed to send gauge metric: {e}")
 
