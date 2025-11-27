@@ -26,8 +26,9 @@ spec:
         runAsUser: 1000
       containers:
         - name: {{ .Chart.Name }}
-          image: "quay.io/ukhomeofficedigital/dsa-re-oneagent-monitor:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "python:3.11-slim"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "echo 'OneAgent Monitor placeholder - waiting for real image' && sleep 3600"]
           ports:
             - name: http
               containerPort: 8000
