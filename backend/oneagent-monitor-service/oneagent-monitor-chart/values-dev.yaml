@@ -15,7 +15,7 @@ service:
 imagePullSecrets: []
 
 image:
-  pullPolicy: Always
+  pullPolicy: Never
   tag: "latest"
 
 resources:
@@ -29,3 +29,8 @@ resources:
 # Environment-specific configuration
 environment: dev
 watchNamespace: dsa-re-dev
+
+# RBAC configuration
+rbac:
+  create: true
+  clusterRoleName: "dsa-pod-patch"  # Reuse existing ClusterRole

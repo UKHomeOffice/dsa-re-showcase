@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-dynatrace-connection
+  namespace: dsa-re-dev
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: test-connection
+        image: quay.io/ukhomeofficedigital/dsa-re-notification-service:latest
+        command: ["python", "-c"]
+        args:
+        - |
+          import requests
+          import os
+          import time
+          
+          dt_api_url = os.getenv('DYNATRACE_METRICS_API_URL')
+          dt_token = os.getenv('DYNATRACE_METRICS_TOKEN')
+          
+          print(f'API URL: {dt_api_url}')
+          print(f'Token exists: {bool(dt_token)}')
+          
+          if dt_api_url and dt_token:
+              metric_data = {
+                  'displayName': 'Test Connection',
+                  'unit': 'Count',
+                  'series': [{
+                      'metricKey': 'ho.re.test.connection',
+                      'dataPoints': [{
+                          'timestamp': int(time.time() * 1000),
+                          'value': 1
+                      }]
+                  }]
+              }
+              
+              headers = {
+                  'Authorization': f'Api-Token {dt_token}',
+                  'Content-Type': 'application/json'
+              }
+              
+              try:
+                  response = requests.post(dt_api_url, json=metric_data, headers=headers, verify=False, timeout=10)
+                  print(f'Response status: {response.status_code}')
+                  print(f'Response text: {response.text}')
+                  if response.status_code == 202:
+                      print('SUCCESS: Metric sent to Dynatrace!')
+                  else:
+                      print(f'FAILED: HTTP {response.status_code}')
+              except Exception as e:
+                  print(f'ERROR: {e}')
+          else:
+              print('Missing environment variables')
+        env:
+        - name: DYNATRACE_METRICS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: registration-service-dynatrace-metrics-ingest
+              key: token
+        - name: DYNATRACE_METRICS_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: registration-service-dynatrace-metrics-ingest
+              key: api_url

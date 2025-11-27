@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="OneAgent Monitor Service")
 
+
 class OneAgentMonitor:
     def __init__(self):
         try:
@@ -23,8 +24,8 @@ class OneAgentMonitor:
         self.watch_namespace = os.getenv("WATCH_NAMESPACE", "dsa-re-dev")
         self.dt_api_url = os.getenv("DYNATRACE_METRICS_API_URL")
         self.dt_token = os.getenv("DYNATRACE_METRICS_TOKEN")
-        self.uninstrumented_pods = set()  # Track uninstrumented pods
-        
+        self.uninstrumented_pods = set()
+
     def send_metric(self, pod_name, namespace, uninstrumented_type):
         """Send uninstrumented pod metric to Dynatrace"""
         timestamp = int(time.time() * 1000)
@@ -43,7 +44,7 @@ class OneAgentMonitor:
                 logger.info(f"SUCCESS: Uninstrumented pod metric sent for {pod_name}")
         except Exception as e:
             logger.error(f"Failed to send metric: {e}")
-    
+
     def send_gauge_metric(self):
         """Send gauge metric with current count of uninstrumented pods"""
         timestamp = int(time.time() * 1000)
@@ -66,11 +67,9 @@ class OneAgentMonitor:
 
     def check_oneagent_uninstrumented(self, pod):
         """Check if pod is running but OneAgent is not properly installed"""
-        # Skip if pod is not running
         if pod.status.phase != "Running":
             return None
             
-        # Check if pod has OneAgent init container configured
         has_oneagent_init = False
         if pod.spec.init_containers:
             for init_container in pod.spec.init_containers:
@@ -78,11 +77,9 @@ class OneAgentMonitor:
                     has_oneagent_init = True
                     break
         
-        # If no OneAgent init container, pod is uninstrumented
         if not has_oneagent_init:
             return "no_oneagent_init_container"
             
-        # Check if OneAgent init container failed
         if pod.status.init_container_statuses:
             for status in pod.status.init_container_statuses:
                 if "oneagent" in status.name.lower():
@@ -90,10 +87,6 @@ class OneAgentMonitor:
                         return "oneagent_download_failed"
                     if status.state.waiting and "Error" in str(status.state.waiting.reason):
                         return "oneagent_init_error"
-        
-        # Check if OneAgent files exist in running container
-        # This would require exec into container - for now we assume if init succeeded, OneAgent is present
-        # Could be enhanced to check for LD_PRELOAD env var or OneAgent files
         
         return None
 
@@ -116,12 +109,12 @@ class OneAgentMonitor:
                         self.send_metric(pod.metadata.name, pod.metadata.namespace, uninstrumented_type)
                         self.uninstrumented_pods.add(pod_key)
                 else:
-                    # Pod is properly instrumented, remove from tracking
                     self.uninstrumented_pods.discard(pod_key)
             
             elif event_type == 'DELETED':
                 pod_key = f"{pod.metadata.namespace}/{pod.metadata.name}"
                 self.uninstrumented_pods.discard(pod_key)
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -130,13 +123,16 @@ async def startup_event():
     monitor_thread.start()
     logger.info("OneAgent Monitor Service started")
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "oneagent-monitor"}
 
+
 @app.get("/")
 async def root():
     return {"message": "OneAgent Monitor Service", "namespace": os.getenv("WATCH_NAMESPACE", "dsa-re-dev")}
+
 
 if __name__ == "__main__":
     import uvicorn
