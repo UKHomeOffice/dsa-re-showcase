@@ -26,7 +26,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: {{ .Chart.Name }}
-          image: "python:3.11-slim"
+          image: "quay.io/ukhomeofficedigital/dsa-re-notification-service:latest"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["sh", "-c", "echo 'OneAgent Monitor placeholder - waiting for real image' && sleep 3600"]
           ports:
