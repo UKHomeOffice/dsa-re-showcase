@@ -25,6 +25,10 @@ resources:
 environment:
   watchNamespace: "dsa-re-dev"
 
+rbac:
+  create: true
+  clusterRoleName: "dsa-pod-patch"
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
