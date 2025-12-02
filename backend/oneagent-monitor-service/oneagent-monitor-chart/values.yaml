@@ -1,6 +1,7 @@
 replicaCount: 1
 
 image:
+  repository: "quay.io/ukhomeofficedigital/dsa-re-notification-service"
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -20,6 +21,9 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
+environment:
+  watchNamespace: "dsa-re-dev"
 
 nodeSelector: {}
 tolerations: []

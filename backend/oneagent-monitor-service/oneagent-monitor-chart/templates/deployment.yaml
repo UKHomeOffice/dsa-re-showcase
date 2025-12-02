@@ -26,9 +26,10 @@ spec:
         runAsUser: 1000
       containers:
         - name: {{ .Chart.Name }}
-          image: "quay.io/ukhomeofficedigital/dsa-re-notification-service:latest"
+          image: "{{ .Values.image.repository | default "quay.io/ukhomeofficedigital/dsa-re-notification-service" }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["sh", "-c", "echo 'OneAgent Monitor placeholder - waiting for real image' && sleep 3600"]
+          workingDir: /app
+          command: ["python", "main.py"]
           ports:
             - name: http
               containerPort: 8000
@@ -48,17 +49,11 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: WATCH_NAMESPACE
-              value: {{ .Values.watchNamespace | default .Release.Namespace }}
+              value: {{ .Values.environment.watchNamespace | default .Release.Namespace }}
             - name: DYNATRACE_METRICS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
-                  key: token
+              value: "dt0c01.ST2EY72KQINMH574WMNVI7YN.G3DFPBEJYMODIDAEX454M7YWBUVEFOWKPRVMWFM36SZIRGEIRYMQ"
             - name: DYNATRACE_METRICS_API_URL
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-metrics-ingest
-                  key: api_url
+              value: "https://activegate-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/metrics/ingest"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
