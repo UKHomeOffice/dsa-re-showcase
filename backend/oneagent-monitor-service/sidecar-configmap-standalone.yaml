@@ -13,28 +13,23 @@ data:
     from datetime import datetime
 
     def get_pod_annotations():
-        """Get pod annotations using Kubernetes API"""
+        """Get pod annotations from Downward API"""
         try:
-            # Read service account token
-            with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as f:
-                token = f.read().strip()
+            with open('/etc/podinfo/annotations', 'r') as f:
+                annotations_text = f.read().strip()
             
-            # Kubernetes API endpoint
-            api_url = f"https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{os.environ['POD_NAMESPACE']}/pods/{os.environ['POD_NAME']}"
+            # Parse annotations (format: key="value")
+            annotations = {}
+            for line in annotations_text.split('\n'):
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    # Remove quotes from value
+                    value = value.strip('"')
+                    annotations[key] = value
             
-            response = requests.get(
-                api_url,
-                headers={'Authorization': f'Bearer {token}'},
-                verify='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                pod_data = response.json()
-                return pod_data.get('metadata', {}).get('annotations', {})
-            return {}
+            return annotations
         except Exception as e:
-            print(f"Error getting annotations: {e}")
+            print(f"Error reading annotations: {e}")
             return {}
 
     def send_metric_to_dynatrace(metric_name, value, dimensions):
@@ -43,10 +38,10 @@ data:
         dim_str = ','.join([f"{k}={v}" for k, v in dimensions.items()])
         metric_line = f"{metric_name},{dim_str} {value} {timestamp}"
         
-        # Try multiple endpoints
+        # Try internal ActiveGate first (should work), then external as fallback
         endpoints = [
             os.environ['DYNATRACE_METRICS_API_URL'],
-            'https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local:9999/e/ewo35763/api/v2/metrics/ingest'
+            'https://ewo35763.live.dynatrace.com/api/v2/metrics/ingest'
         ]
         
         for endpoint in endpoints:
@@ -97,7 +92,7 @@ data:
                 
                 # Send status metric
                 if oneagent_status in ['failed', 'not-attempted']:
-                    send_metric_to_dynatrace('ho.re.oneagent.pod.uninstrumented', 1, dimensions)
+                    send_metric_to_dynatrace('ho.re.oneagent.pod.uninstrumented.event', 1, dimensions)
                     print(f"Pod {pod_name} is uninstrumented: {oneagent_status}")
                 else:
                     print(f"Pod {pod_name} is instrumented: {oneagent_status}")

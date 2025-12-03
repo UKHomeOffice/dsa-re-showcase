@@ -20,7 +20,12 @@ spec:
         matchLabels:
           name: dynatrace
   - ports:
+    - port: 443
+      protocol: TCP
+    to: []
+  - ports:
     - port: 53
       protocol: TCP
     - port: 53
       protocol: UDP
+    to: []

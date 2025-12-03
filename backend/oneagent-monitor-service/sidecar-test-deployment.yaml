@@ -43,13 +43,21 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: DYNATRACE_METRICS_API_URL
-          value: "https://activegate-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/metrics/ingest"
+          valueFrom:
+            secretKeyRef:
+              name: registration-service-dynatrace-metrics-ingest
+              key: api_url
         - name: DYNATRACE_METRICS_TOKEN
-          value: "dt0c01.ST2EY72KQINMH574WMNVI7YN.G3DFPBEJYMODIDAEX454M7YWBUVEFOWKPRVMWFM36SZIRGEIRYMQ"
+          valueFrom:
+            secretKeyRef:
+              name: registration-service-dynatrace-metrics-ingest
+              key: token
         volumeMounts:
         - name: sidecar-script
           mountPath: /app/sidecar-monitor.py
           subPath: sidecar-monitor.py
+        - name: podinfo
+          mountPath: /etc/podinfo
         resources:
           limits:
             memory: "64Mi"
@@ -62,3 +70,9 @@ spec:
         configMap:
           name: oneagent-monitor-sidecar
           defaultMode: 0755
+      - name: podinfo
+        downwardAPI:
+          items:
+          - path: "annotations"
+            fieldRef:
+              fieldPath: metadata.annotations
