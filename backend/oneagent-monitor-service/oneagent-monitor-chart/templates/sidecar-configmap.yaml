@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "oneagent-monitor.fullname" . }}-sidecar
+  labels:
+    {{- include "oneagent-monitor.labels" . | nindent 4 }}
+data:
+  sidecar-monitor.py: |
+    #!/usr/bin/env python3
+    import os
+    import time
+    import requests
+    import subprocess
+    import json
+    from datetime import datetime
+
+    def get_pod_annotations():
+        """Get pod annotations using kubectl"""
+        try:
+            result = subprocess.run([
+                'kubectl', 'get', 'pod', os.environ['POD_NAME'], 
+                '-n', os.environ['POD_NAMESPACE'], 
+                '-o', 'jsonpath={.metadata.annotations}'
+            ], capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and result.stdout.strip():
+                return json.loads(result.stdout)
+            return {}
+        except Exception as e:
+            print(f"Error getting annotations: {e}")
+            return {}
+
+    def send_metric_to_dynatrace(metric_name, value, dimensions):
+        """Send metric to Dynatrace in text/plain format"""
+        try:
+            timestamp = int(datetime.now().timestamp() * 1000)
+            
+            # Format dimensions
+            dim_str = ','.join([f"{k}={v}" for k, v in dimensions.items()])
+            metric_line = f"{metric_name},{dim_str} {value} {timestamp}"
+            
+            response = requests.post(
+                f"{os.environ['DYNATRACE_API_URL']}/v2/metrics/ingest",
+                headers={
+                    'Authorization': f"Api-Token {os.environ['DYNATRACE_API_TOKEN']}",
+                    'Content-Type': 'text/plain'
+                },
+                data=metric_line,
+                timeout=10
+            )
+            
+            if response.status_code == 202:
+                print(f"Metric sent: {metric_line}")
+            else:
+                print(f"Failed to send metric: {response.status_code}")
+                
+        except Exception as e:
+            print(f"Error sending metric: {e}")
+
+    def monitor_oneagent_status():
+        """Monitor OneAgent status and report to Dynatrace"""
+        pod_name = os.environ['POD_NAME']
+        namespace = os.environ['POD_NAMESPACE']
+        
+        print(f"Starting OneAgent monitoring for pod {pod_name} in namespace {namespace}")
+        
+        while True:
+            try:
+                annotations = get_pod_annotations()
+                oneagent_status = annotations.get('dynatrace.com/oneagent-status', 'not-attempted')
+                
+                dimensions = {
+                    'pod': pod_name,
+                    'namespace': namespace,
+                    'status': oneagent_status
+                }
+                
+                # Send status metric
+                if oneagent_status in ['failed', 'not-attempted']:
+                    send_metric_to_dynatrace('ho.re.oneagent.pod.uninstrumented', 1, dimensions)
+                    print(f"Pod {pod_name} is uninstrumented: {oneagent_status}")
+                else:
+                    print(f"Pod {pod_name} is instrumented: {oneagent_status}")
+                
+                time.sleep(300)  # Check every 5 minutes
+                
+            except Exception as e:
+                print(f"Error in monitoring loop: {e}")
+                time.sleep(60)  # Retry after 1 minute on error
+
+    if __name__ == "__main__":
+        monitor_oneagent_status()

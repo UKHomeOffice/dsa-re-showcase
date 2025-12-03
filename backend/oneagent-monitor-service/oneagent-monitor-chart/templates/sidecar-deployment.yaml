@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "oneagent-monitor.fullname" . }}-sidecar-example
+  labels:
+    {{- include "oneagent-monitor.labels" . | nindent 4 }}
+    component: sidecar-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "oneagent-monitor.selectorLabels" . | nindent 6 }}
+      component: sidecar-example
+  template:
+    metadata:
+      annotations:
+        dynatrace.com/oneagent-status: "instrumented"
+      labels:
+        {{- include "oneagent-monitor.selectorLabels" . | nindent 8 }}
+        component: sidecar-example
+    spec:
+      serviceAccountName: {{ include "oneagent-monitor.serviceAccountName" . }}
+      containers:
+      - name: main-app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+      - name: oneagent-monitor
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command: ["python3", "/app/sidecar-monitor.py"]
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DYNATRACE_API_URL
+          value: {{ .Values.environment.dynatraceApiUrl | quote }}
+        - name: DYNATRACE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.environment.dynatraceSecretName }}
+              key: {{ .Values.environment.dynatraceSecretKey }}
+        volumeMounts:
+        - name: sidecar-script
+          mountPath: /app/sidecar-monitor.py
+          subPath: sidecar-monitor.py
+        - name: kubectl-binary
+          mountPath: /usr/local/bin/kubectl
+          subPath: kubectl
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+      volumes:
+      - name: sidecar-script
+        configMap:
+          name: {{ include "oneagent-monitor.fullname" . }}-sidecar
+          defaultMode: 0755
+      - name: kubectl-binary
+        hostPath:
+          path: /usr/bin/kubectl
