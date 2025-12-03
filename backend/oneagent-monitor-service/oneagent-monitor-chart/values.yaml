@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: "quay.io/ukhomeofficedigital/dsa-re-notification-service"
+  repository: "python"
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "3.11-slim"
 
 serviceAccount:
   create: false

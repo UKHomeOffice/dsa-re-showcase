@@ -111,15 +111,6 @@ spec:
               value: {{ .Values.kafka.groupId }}
             - name: KAFKA_CERT_PATH
               value: {{ .Values.kafka.certPath }}
-            - name: WATCH_NAMESPACE
-              value: {{ .Release.Namespace }}
-            - name: DYNATRACE_METRICS_API_URL
-              value: "https://activegate-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/metrics/ingest"
-            - name: DYNATRACE_METRICS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: registration-service-dynatrace-oneagent
-                  key: paas-installer-download-token
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so

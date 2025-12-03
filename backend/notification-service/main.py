@@ -7,7 +7,6 @@ from kafka_consumer import start_consumer
 import oneagent
 import oneagent.sdk
 from db import initialize_db, test_db_connection
-from oneagent_monitor import start_oneagent_monitor
 
 
 # Configure logging
@@ -67,15 +66,6 @@ def health():
 def get_recent_logins():
   return {"logins": recent_logins}
 
-@app.get("/oneagent-status")
-def get_oneagent_status():
-  """Get OneAgent monitoring status"""
-  return {
-    "status": "monitoring", 
-    "namespace": os.getenv("WATCH_NAMESPACE", "dsa-re-dev"),
-    "service": "oneagent-monitor"
-  }
-
 @app.post("/simulate-login")
 def simulate_login(email: str = "user@example.com"):
   """Simulate login for testing..."""
@@ -104,7 +94,7 @@ def simulate_login(email: str = "user@example.com"):
 
 @app.on_event("startup")
 async def startup_event():
-  """Start kafka consumer and OneAgent monitor on startup"""
+  """Start kafka consumer on startup"""
   asyncio.create_task(
     start_consumer(
       bootstrap_servers=KAFKA_SERVERS, 
@@ -115,9 +105,6 @@ async def startup_event():
       sdk=sdk,
       )
   )
-  
-  # Start OneAgent monitoring
-  start_oneagent_monitor()
 
 if __name__ == "__main__":
   import uvicorn

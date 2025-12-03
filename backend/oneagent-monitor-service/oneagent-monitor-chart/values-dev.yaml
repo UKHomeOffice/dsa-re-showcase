@@ -27,8 +27,8 @@ resources:
     memory: 128Mi
 
 # Environment-specific configuration
-environment: dev
-watchNamespace: dsa-re-dev
+environment:
+  watchNamespace: dsa-re-dev
 
 # RBAC configuration
 rbac:
