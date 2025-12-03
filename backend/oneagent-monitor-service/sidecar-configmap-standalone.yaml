@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oneagent-monitor-sidecar
+  namespace: dsa-re-dev
+data:
+  sidecar-monitor.py: |
+    #!/usr/bin/env python3
+    import os
+    import time
+    import requests
+    import json
+    from datetime import datetime
+
+    def get_pod_annotations():
+        """Get pod annotations using Kubernetes API"""
+        try:
+            # Read service account token
+            with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as f:
+                token = f.read().strip()
+            
+            # Kubernetes API endpoint
+            api_url = f"https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{os.environ['POD_NAMESPACE']}/pods/{os.environ['POD_NAME']}"
+            
+            response = requests.get(
+                api_url,
+                headers={'Authorization': f'Bearer {token}'},
+                verify='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                pod_data = response.json()
+                return pod_data.get('metadata', {}).get('annotations', {})
+            return {}
+        except Exception as e:
+            print(f"Error getting annotations: {e}")
+            return {}
+
+    def send_metric_to_dynatrace(metric_name, value, dimensions):
+        """Send metric to Dynatrace in text/plain format with retry logic"""
+        timestamp = int(datetime.now().timestamp() * 1000)
+        dim_str = ','.join([f"{k}={v}" for k, v in dimensions.items()])
+        metric_line = f"{metric_name},{dim_str} {value} {timestamp}"
+        
+        # Try multiple endpoints
+        endpoints = [
+            os.environ['DYNATRACE_METRICS_API_URL'],
+            'https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local:9999/e/ewo35763/api/v2/metrics/ingest'
+        ]
+        
+        for endpoint in endpoints:
+            for attempt in range(3):  # 3 retry attempts
+                try:
+                    response = requests.post(
+                        endpoint,
+                        headers={
+                            'Authorization': f"Api-Token {os.environ['DYNATRACE_METRICS_TOKEN']}",
+                            'Content-Type': 'text/plain'
+                        },
+                        data=metric_line,
+                        timeout=15,
+                        verify=False
+                    )
+                    
+                    if response.status_code == 202:
+                        print(f"SUCCESS: Metric sent to {endpoint}: {metric_line}")
+                        return True
+                    else:
+                        print(f"HTTP {response.status_code} from {endpoint}: {response.text[:100]}")
+                        
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed for {endpoint}: {str(e)[:100]}")
+                    if attempt < 2:  # Don't sleep on last attempt
+                        time.sleep(5)
+        
+        print(f"FAILED: Could not send metric after all attempts: {metric_line}")
+        return False
+
+    def monitor_oneagent_status():
+        """Monitor OneAgent status and report to Dynatrace"""
+        pod_name = os.environ['POD_NAME']
+        namespace = os.environ['POD_NAMESPACE']
+        
+        print(f"Starting OneAgent monitoring for pod {pod_name} in namespace {namespace}")
+        
+        while True:
+            try:
+                annotations = get_pod_annotations()
+                oneagent_status = annotations.get('dynatrace.com/oneagent-status', 'not-attempted')
+                
+                dimensions = {
+                    'pod': pod_name,
+                    'namespace': namespace,
+                    'status': oneagent_status
+                }
+                
+                # Send status metric
+                if oneagent_status in ['failed', 'not-attempted']:
+                    send_metric_to_dynatrace('ho.re.oneagent.pod.uninstrumented', 1, dimensions)
+                    print(f"Pod {pod_name} is uninstrumented: {oneagent_status}")
+                else:
+                    print(f"Pod {pod_name} is instrumented: {oneagent_status}")
+                
+                time.sleep(300)  # Check every 5 minutes
+                
+            except Exception as e:
+                print(f"Error in monitoring loop: {e}")
+                time.sleep(60)  # Retry after 1 minute on error
+
+    if __name__ == "__main__":
+        monitor_oneagent_status()

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oneagent-monitor-sidecar-test
+  namespace: dsa-re-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oneagent-monitor-sidecar-test
+  template:
+    metadata:
+      annotations:
+        dynatrace.com/oneagent-status: "not-attempted"
+      labels:
+        app: oneagent-monitor-sidecar-test
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: main-app
+        image: quay.io/ukhomeofficedigital/dsa-re-notification-service:latest
+        ports:
+        - containerPort: 8000
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+      - name: oneagent-monitor
+        image: quay.io/ukhomeofficedigital/dsa-re-notification-service:latest
+        command: ["python3", "/app/sidecar-monitor.py"]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DYNATRACE_METRICS_API_URL
+          value: "https://activegate-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/metrics/ingest"
+        - name: DYNATRACE_METRICS_TOKEN
+          value: "dt0c01.ST2EY72KQINMH574WMNVI7YN.G3DFPBEJYMODIDAEX454M7YWBUVEFOWKPRVMWFM36SZIRGEIRYMQ"
+        volumeMounts:
+        - name: sidecar-script
+          mountPath: /app/sidecar-monitor.py
+          subPath: sidecar-monitor.py
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+      volumes:
+      - name: sidecar-script
+        configMap:
+          name: oneagent-monitor-sidecar
+          defaultMode: 0755

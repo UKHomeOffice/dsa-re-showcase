@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: oneagent-monitor-sidecar-egress
+  namespace: dsa-re-dev
+spec:
+  podSelector:
+    matchLabels:
+      app: oneagent-monitor-sidecar-test
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - port: 80
+      protocol: TCP
+    - port: 443
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          name: dynatrace
+  - ports:
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP
