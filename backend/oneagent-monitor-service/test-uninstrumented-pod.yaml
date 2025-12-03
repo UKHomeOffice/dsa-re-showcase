@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: uninstrumented-pod
+      annotations:
+        dynatrace.oneagent.status: "not-attempted"
     spec:
       # Deliberately NO initContainers - no OneAgent installation
       containers:

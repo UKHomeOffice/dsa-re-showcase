@@ -27,9 +27,9 @@ class OneAgentMonitor:
         self.uninstrumented_pods = set()
 
     def send_metric(self, pod_name, namespace, uninstrumented_type):
-        """Send uninstrumented pod metric to Dynatrace"""
+        """Send uninstrumented pod event to Dynatrace"""
         timestamp = int(time.time() * 1000)
-        metric_lines = f"ho.re.oneagent.pod.uninstrumented,pod_name={pod_name},namespace={namespace},uninstrumented_type={uninstrumented_type} 1 {timestamp}"
+        metric_lines = f"ho.re.oneagent.pod.event,pod_name={pod_name},namespace={namespace},event_type=uninstrumented,uninstrumented_type={uninstrumented_type} 1 {timestamp}"
         
         headers = {
             "Authorization": f"Api-Token {self.dt_token}",
@@ -39,11 +39,11 @@ class OneAgentMonitor:
         try:
             response = requests.post(self.dt_api_url, 
                                    data=metric_lines, headers=headers, verify=False)
-            logger.info(f"Metric sent for {pod_name}: {response.status_code}")
+            logger.info(f"Event sent for {pod_name}: {response.status_code}")
             if response.status_code == 202:
-                logger.info(f"SUCCESS: Uninstrumented pod metric sent for {pod_name}")
+                logger.info(f"SUCCESS: Uninstrumented pod event sent for {pod_name}")
         except Exception as e:
-            logger.error(f"Failed to send metric: {e}")
+            logger.error(f"Failed to send event: {e}")
 
     def send_gauge_metric(self):
         """Send gauge metric with current count of uninstrumented pods"""
@@ -65,30 +65,25 @@ class OneAgentMonitor:
         except Exception as e:
             logger.error(f"Failed to send gauge metric: {e}")
 
-    def check_oneagent_uninstrumented(self, pod):
-        """Check if pod is running but OneAgent is not properly installed"""
+    def check_oneagent_status(self, pod):
+        """Check OneAgent status using pod annotations"""
         if pod.status.phase != "Running":
             return None
             
-        has_oneagent_init = False
-        if pod.spec.init_containers:
-            for init_container in pod.spec.init_containers:
-                if "oneagent" in init_container.name.lower():
-                    has_oneagent_init = True
-                    break
+        annotations = pod.metadata.annotations or {}
         
-        if not has_oneagent_init:
-            return "no_oneagent_init_container"
-            
-        if pod.status.init_container_statuses:
-            for status in pod.status.init_container_statuses:
-                if "oneagent" in status.name.lower():
-                    if status.state.terminated and status.state.terminated.exit_code != 0:
-                        return "oneagent_download_failed"
-                    if status.state.waiting and "Error" in str(status.state.waiting.reason):
-                        return "oneagent_init_error"
+        # Check for OneAgent status annotation
+        status = annotations.get("dynatrace.oneagent.status", "not-attempted")
         
-        return None
+        if status == "instrumented":
+            return None  # Successfully instrumented
+        elif status == "failed":
+            error = annotations.get("dynatrace.oneagent.error", "unknown")
+            return f"failed_{error}"
+        elif status == "attempting":
+            return "attempting_instrumentation"
+        else:  # not-attempted or any other value
+            return "not_attempted"
 
     def watch_pods(self):
         """Watch pod events for OneAgent failures"""
@@ -100,16 +95,20 @@ class OneAgentMonitor:
             event_type = event['type']
             
             if event_type in ['ADDED', 'MODIFIED']:
-                uninstrumented_type = self.check_oneagent_uninstrumented(pod)
+                status_type = self.check_oneagent_status(pod)
                 pod_key = f"{pod.metadata.namespace}/{pod.metadata.name}"
                 
-                if uninstrumented_type:
+                if status_type:
                     if pod_key not in self.uninstrumented_pods:
-                        logger.warning(f"Uninstrumented pod detected: {pod.metadata.name} - {uninstrumented_type}")
-                        self.send_metric(pod.metadata.name, pod.metadata.namespace, uninstrumented_type)
+                        logger.warning(f"Non-instrumented pod detected: {pod.metadata.name} - {status_type}")
+                        self.send_metric(pod.metadata.name, pod.metadata.namespace, status_type)
                         self.uninstrumented_pods.add(pod_key)
+                        self.send_gauge_metric()
                 else:
-                    self.uninstrumented_pods.discard(pod_key)
+                    if pod_key in self.uninstrumented_pods:
+                        logger.info(f"Pod now instrumented: {pod.metadata.name}")
+                        self.uninstrumented_pods.discard(pod_key)
+                        self.send_gauge_metric()
             
             elif event_type == 'DELETED':
                 pod_key = f"{pod.metadata.namespace}/{pod.metadata.name}"
