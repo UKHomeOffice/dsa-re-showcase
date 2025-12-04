@@ -26,12 +26,19 @@ data:
         except ImportError:
             logger.info("Installing kubernetes client...")
             try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "kubernetes"])
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "kubernetes"])
                 import kubernetes
                 return True
             except Exception as e:
                 logger.error(f"Failed to install kubernetes client: {e}")
-                return False
+                try:
+                    # Try without --user flag
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", "kubernetes", "--break-system-packages"])
+                    import kubernetes
+                    return True
+                except Exception as e2:
+                    logger.error(f"Second attempt failed: {e2}")
+                    return False
 
     class OneAgentMonitor:
         def __init__(self):
@@ -48,9 +55,11 @@ data:
                     from kubernetes import client, config
                     config.load_incluster_config()
                     self.v1 = client.CoreV1Api()
-                    logger.info("Kubernetes client initialized successfully")
+                    logger.info("✅ Kubernetes client initialized successfully")
                 except Exception as e:
                     logger.error(f"Failed to initialize Kubernetes client: {e}")
+            else:
+                logger.error("❌ Cannot install Kubernetes client - will send API failure metrics")
             
         def send_metric_to_dynatrace(self, metric_line):
             """Send metric to Dynatrace with fallback URLs"""
