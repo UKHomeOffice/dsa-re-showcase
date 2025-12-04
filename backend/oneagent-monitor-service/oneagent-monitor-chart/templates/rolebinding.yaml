@@ -1,5 +1,17 @@
 {{- if .Values.rbac.create }}
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "oneagent-monitor-chart.fullname" . }}-role
+  namespace: {{ .Values.environment.watchNamespace | default .Release.Namespace }}
+  labels:
+    {{- include "oneagent-monitor-chart.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "oneagent-monitor-chart.fullname" . }}-rbac
@@ -12,6 +24,6 @@ subjects:
   namespace: {{ .Values.environment.watchNamespace | default .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ .Values.rbac.clusterRoleName | default "dsa-pod-patch" }}
+  kind: Role
+  name: {{ include "oneagent-monitor-chart.fullname" . }}-role
 {{- end }}

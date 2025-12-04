@@ -8,188 +8,140 @@ data:
   oneagent_monitor.py: |
     #!/usr/bin/env python3
     import os
+    import sys
+    import subprocess
     import time
     import logging
     import requests
-    import threading
-    import subprocess
-    import sys
+    from datetime import datetime
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
-    # Install kubernetes client if not available
     def install_kubernetes_client():
         try:
             import kubernetes
+            logger.info("Kubernetes client already available")
             return True
         except ImportError:
             logger.info("Installing kubernetes client...")
             try:
-                # Create .local directory first
-                import os
-                os.makedirs(os.path.expanduser("~/.local"), exist_ok=True)
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "kubernetes"])
+                subprocess.check_call([
+                    sys.executable, "-m", "pip", "install", 
+                    "--target", "/tmp", "--no-cache-dir", 
+                    "kubernetes"
+                ])
+                sys.path.insert(0, '/tmp')
                 import kubernetes
+                logger.info("Kubernetes client installed successfully")
                 return True
             except Exception as e:
                 logger.error(f"Failed to install kubernetes client: {e}")
-                try:
-                    # Try installing to /tmp
-                    subprocess.check_call([sys.executable, "-m", "pip", "install", "--target", "/tmp", "kubernetes"])
-                    sys.path.insert(0, "/tmp")
-                    import kubernetes
-                    return True
-                except Exception as e2:
-                    logger.error(f"Second attempt failed: {e2}")
-                    return False
+                return False
 
-    class OneAgentMonitor:
-        def __init__(self):
-            self.namespace = os.getenv("WATCH_NAMESPACE", "dsa-re-dev")
-            self.dt_api_url = os.getenv("DYNATRACE_METRICS_API_URL")
-            self.dt_token = os.getenv("DYNATRACE_METRICS_TOKEN")
-            self.uninstrumented_pods = set()
-            self.last_api_success = time.time()
-            self.v1 = None
-            
-            # Initialize Kubernetes client
-            if install_kubernetes_client():
-                try:
-                    from kubernetes import client, config
-                    config.load_incluster_config()
-                    self.v1 = client.CoreV1Api()
-                    logger.info("✅ Kubernetes client initialized successfully")
-                except Exception as e:
-                    logger.error(f"Failed to initialize Kubernetes client: {e}")
-            else:
-                logger.error("❌ Cannot install Kubernetes client - will send API failure metrics")
-            
-        def send_metric_to_dynatrace(self, metric_line):
-            """Send metric to Dynatrace with fallback URLs"""
-            urls = [
-                self.dt_api_url,  # Internal ActiveGate
-                "https://ewo35763.live.dynatrace.com/api/v2/metrics/ingest"  # External SaaS
-            ]
+    def send_metric_to_dynatrace(metric_name, metric_value, dimensions, token, api_url):
+        try:
+            timestamp = int(datetime.now().timestamp() * 1000)
+            dims = ",".join([f"{k}={v}" for k, v in dimensions.items()])
+            metric_line = f"{metric_name},{dims} {metric_value} {timestamp}"
             
             headers = {
-                "Authorization": f"Api-Token {self.dt_token}",
-                "Content-Type": "text/plain; charset=utf-8"
+                'Authorization': f'Api-Token {token}',
+                'Content-Type': 'text/plain'
             }
             
-            for url in urls:
-                try:
-                    response = requests.post(url, data=metric_line, headers=headers, verify=False, timeout=10)
-                    if response.status_code == 202:
-                        logger.info(f"SUCCESS: {metric_line.split(',')[0]}")
-                        return True
-                except Exception as e:
-                    logger.error(f"Failed to send to {url}: {e}")
+            response = requests.post(api_url, data=metric_line, headers=headers, timeout=10)
+            
+            if response.status_code == 202:
+                logger.info(f"Metric sent successfully: {metric_name}={metric_value}")
+                return True
+            else:
+                logger.error(f"Failed to send metric: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            logger.error(f"Error sending metric: {e}")
             return False
 
-        def get_pods_via_api(self):
-            """Get pods using Kubernetes Python client"""
-            if not self.v1:
-                return None
-                
-            try:
-                pods = self.v1.list_namespaced_pod(namespace=self.namespace)
-                self.last_api_success = time.time()
-                return pods
-            except Exception as e:
-                logger.error(f"Failed to get pods via API: {e}")
-                return None
-
-        def check_oneagent_status(self, pod):
-            """Check OneAgent status using pod annotations"""
-            annotations = pod.metadata.annotations or {}
-            status = annotations.get("dynatrace.com/oneagent-status", "not-attempted")
-            
-            if status == "instrumented":
-                return None  # Successfully instrumented
-            elif status == "failed":
-                error = annotations.get("dynatrace.com/oneagent-error", "unknown")
-                return f"failed_{error}"
-            elif status == "attempting":
-                return "attempting_instrumentation"
-            else:
-                return "not_attempted"
-
-        def send_heartbeat(self):
-            """Send heartbeat every 60 seconds"""
-            while True:
-                timestamp = int(time.time() * 1000)
-                metric = f"ho.re.oneagent.monitor.heartbeat,namespace={self.namespace} 1 {timestamp}"
-                self.send_metric_to_dynatrace(metric)
-                time.sleep(60)
-
-        def monitor_pods(self):
-            """Monitor pods for OneAgent status"""
-            logger.info(f"Starting OneAgent monitor for namespace: {self.namespace}")
-            
-            # Start heartbeat thread
-            heartbeat_thread = threading.Thread(target=self.send_heartbeat, daemon=True)
-            heartbeat_thread.start()
-            
-            while True:
-                try:
-                    # Get current pods
-                    pods_response = self.get_pods_via_api()
-                    
-                    if pods_response is None:
-                        # API failure - send alert
-                        timestamp = int(time.time() * 1000)
-                        metric = f"ho.re.oneagent.monitor.api_failure,namespace={self.namespace} 1 {timestamp}"
-                        self.send_metric_to_dynatrace(metric)
-                        time.sleep(60)
-                        continue
-                    
-                    # Check if API has been working
-                    if time.time() - self.last_api_success > 300:  # 5 minutes
-                        timestamp = int(time.time() * 1000)
-                        metric = f"ho.re.oneagent.monitor.stream_stale,namespace={self.namespace} 1 {timestamp}"
-                        self.send_metric_to_dynatrace(metric)
-                    
-                    current_uninstrumented = set()
-                    
-                    # Check each pod
-                    for pod in pods_response.items:
-                        if pod.status.phase != "Running":
-                            continue
-                            
-                        pod_name = pod.metadata.name
-                        status_type = self.check_oneagent_status(pod)
-                        
-                        if status_type:
-                            pod_key = f"{self.namespace}/{pod_name}"
-                            current_uninstrumented.add(pod_key)
-                            
-                            # Send event for new uninstrumented pods
-                            if pod_key not in self.uninstrumented_pods:
-                                timestamp = int(time.time() * 1000)
-                                metric = f"ho.re.oneagent.pod.uninstrumented-Event,pod_name={pod_name},namespace={self.namespace},event_type=uninstrumented,uninstrumented_type={status_type} 1 {timestamp}"
-                                self.send_metric_to_dynatrace(metric)
-                                logger.warning(f"NEW UNINSTRUMENTED POD DETECTED: {pod_name} - {status_type}")
-                    
-                    # Update uninstrumented pods set
-                    self.uninstrumented_pods = current_uninstrumented
-                    
-                    # Send gauge metric with current count
-                    timestamp = int(time.time() * 1000)
-                    count = len(self.uninstrumented_pods)
-                    metric = f"ho.re.oneagent.pods.uninstrumented.gauge-count,namespace={self.namespace} {count} {timestamp}"
-                    self.send_metric_to_dynatrace(metric)
-                    
-                    logger.info(f"Monitoring cycle completed. Found {count} uninstrumented pods: {[p.split('/')[1] for p in self.uninstrumented_pods]}")
-                    
-                except Exception as e:
-                    logger.error(f"Error in monitoring loop: {e}")
-                
-                time.sleep(30)  # Check every 30 seconds
+    def check_pod_instrumentation(pod):
+        annotations = pod.metadata.annotations or {}
+        oneagent_status = annotations.get('dynatrace.com/oneagent-status', 'not-attempted')
+        
+        if oneagent_status == 'instrumented':
+            return True, 'instrumented'
+        elif oneagent_status == 'failed':
+            return False, 'failed'
+        else:
+            return False, 'not-attempted'
 
     def main():
-        monitor = OneAgentMonitor()
-        monitor.monitor_pods()
+        if not install_kubernetes_client():
+            logger.error("Cannot proceed without kubernetes client")
+            sys.exit(1)
+        
+        from kubernetes import client, config
+        
+        try:
+            config.load_incluster_config()
+            logger.info("Loaded in-cluster config")
+        except:
+            config.load_kube_config()
+            logger.info("Loaded local config")
+        
+        v1 = client.CoreV1Api()
+        
+        namespace = os.getenv('WATCH_NAMESPACE', 'dsa-re-dev')
+        token = os.getenv('DYNATRACE_METRICS_TOKEN')
+        api_url = os.getenv('DYNATRACE_METRICS_API_URL')
+        
+        if not token or not api_url:
+            logger.error("Missing required environment variables")
+            sys.exit(1)
+        
+        logger.info(f"Starting OneAgent monitor for namespace: {namespace}")
+        
+        while True:
+            try:
+                pods = v1.list_namespaced_pod(namespace=namespace)
+                uninstrumented_count = 0
+                
+                for pod in pods.items:
+                    if pod.status.phase in ['Running', 'Pending']:
+                        is_instrumented, status = check_pod_instrumentation(pod)
+                        
+                        if not is_instrumented:
+                            uninstrumented_count += 1
+                            
+                            dimensions = {
+                                'namespace': namespace,
+                                'pod_name': pod.metadata.name,
+                                'status': status
+                            }
+                            
+                            send_metric_to_dynatrace(
+                                'ho.re.oneagent.pod.uninstrumented',
+                                1,
+                                dimensions,
+                                token,
+                                api_url
+                            )
+                            
+                            logger.warning(f"Uninstrumented pod detected: {pod.metadata.name} (status: {status})")
+                
+                dimensions = {'namespace': namespace}
+                send_metric_to_dynatrace(
+                    'ho.re.oneagent.pods.uninstrumented.gauge',
+                    uninstrumented_count,
+                    dimensions,
+                    token,
+                    api_url
+                )
+                
+                logger.info(f"Scan complete: {uninstrumented_count} uninstrumented pods found")
+                
+            except Exception as e:
+                logger.error(f"Error during monitoring cycle: {e}")
+            
+            time.sleep(60)
 
     if __name__ == "__main__":
         main()

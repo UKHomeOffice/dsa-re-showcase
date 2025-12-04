@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+import time
+import logging
+import requests
+from datetime import datetime
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def install_kubernetes_client():
+    """Install kubernetes client if not available"""
+    try:
+        import kubernetes
+        logger.info("Kubernetes client already available")
+        return True
+    except ImportError:
+        logger.info("Installing kubernetes client...")
+        try:
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install", 
+                "--target", "/tmp", "--no-cache-dir", 
+                "kubernetes"
+            ])
+            sys.path.insert(0, '/tmp')
+            import kubernetes
+            logger.info("Kubernetes client installed successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to install kubernetes client: {e}")
+            return False
+
+def send_metric_to_dynatrace(metric_name, metric_value, dimensions, token, api_url):
+    """Send metric to Dynatrace"""
+    try:
+        timestamp = int(datetime.now().timestamp() * 1000)
+        
+        # Build dimensions string
+        dims = ",".join([f"{k}={v}" for k, v in dimensions.items()])
+        metric_line = f"{metric_name},{dims} {metric_value} {timestamp}"
+        
+        headers = {
+            'Authorization': f'Api-Token {token}',
+            'Content-Type': 'text/plain'
+        }
+        
+        response = requests.post(api_url, data=metric_line, headers=headers, timeout=10)
+        
+        if response.status_code == 202:
+            logger.info(f"Metric sent successfully: {metric_name}={metric_value}")
+            return True
+        else:
+            logger.error(f"Failed to send metric: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error sending metric: {e}")
+        return False
+
+def check_pod_instrumentation(pod):
+    """Check if pod has OneAgent instrumentation"""
+    annotations = pod.metadata.annotations or {}
+    oneagent_status = annotations.get('dynatrace.com/oneagent-status', 'not-attempted')
+    
+    if oneagent_status == 'instrumented':
+        return True, 'instrumented'
+    elif oneagent_status == 'failed':
+        return False, 'failed'
+    else:
+        return False, 'not-attempted'
+
+def main():
+    if not install_kubernetes_client():
+        logger.error("Cannot proceed without kubernetes client")
+        sys.exit(1)
+    
+    from kubernetes import client, config
+    
+    # Load config
+    try:
+        config.load_incluster_config()
+        logger.info("Loaded in-cluster config")
+    except:
+        config.load_kube_config()
+        logger.info("Loaded local config")
+    
+    v1 = client.CoreV1Api()
+    
+    # Get environment variables
+    namespace = os.getenv('WATCH_NAMESPACE', 'dsa-re-dev')
+    token = os.getenv('DYNATRACE_METRICS_TOKEN')
+    api_url = os.getenv('DYNATRACE_METRICS_API_URL')
+    
+    if not token or not api_url:
+        logger.error("Missing required environment variables")
+        sys.exit(1)
+    
+    logger.info(f"Starting OneAgent monitor for namespace: {namespace}")
+    
+    while True:
+        try:
+            # List all pods in namespace
+            pods = v1.list_namespaced_pod(namespace=namespace)
+            
+            uninstrumented_count = 0
+            
+            for pod in pods.items:
+                if pod.status.phase in ['Running', 'Pending']:
+                    is_instrumented, status = check_pod_instrumentation(pod)
+                    
+                    if not is_instrumented:
+                        uninstrumented_count += 1
+                        
+                        # Send alert for this specific pod
+                        dimensions = {
+                            'namespace': namespace,
+                            'pod_name': pod.metadata.name,
+                            'status': status
+                        }
+                        
+                        send_metric_to_dynatrace(
+                            'ho.re.oneagent.pod.uninstrumented',
+                            1,
+                            dimensions,
+                            token,
+                            api_url
+                        )
+                        
+                        logger.warning(f"Uninstrumented pod detected: {pod.metadata.name} (status: {status})")
+            
+            # Send total count gauge
+            dimensions = {'namespace': namespace}
+            send_metric_to_dynatrace(
+                'ho.re.oneagent.pods.uninstrumented.gauge',
+                uninstrumented_count,
+                dimensions,
+                token,
+                api_url
+            )
+            
+            logger.info(f"Scan complete: {uninstrumented_count} uninstrumented pods found")
+            
+        except Exception as e:
+            logger.error(f"Error during monitoring cycle: {e}")
+        
+        # Wait 60 seconds before next scan
+        time.sleep(60)
+
+if __name__ == "__main__":
+    main()
