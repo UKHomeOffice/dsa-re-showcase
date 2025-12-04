@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-uninstrumented-new
+  namespace: dsa-re-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-uninstrumented-new
+  template:
+    metadata:
+      labels:
+        app: test-uninstrumented-new
+      annotations:
+        dynatrace.com/oneagent-status: "not-attempted"
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
