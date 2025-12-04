@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: external-monitor-egress
+  namespace: dsa-re-dev
+spec:
+  egress:
+  - ports:
+    - port: 80
+      protocol: TCP
+    - port: 443
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          name: dynatrace
+  - ports:
+    - port: 443
+      protocol: TCP
+    to: []  # Allow HTTPS to any destination
+  - ports:
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP
+    to: []  # Allow DNS
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: oneagent-monitor-chart
+      app.kubernetes.io/instance: release-name
+  policyTypes:
+  - Egress
