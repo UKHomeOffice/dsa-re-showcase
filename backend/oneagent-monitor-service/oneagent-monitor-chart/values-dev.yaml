@@ -15,7 +15,8 @@ service:
 imagePullSecrets: []
 
 image:
-  pullPolicy: Never
+  repository: "quay.io/ukhomeofficedigital/dsa-re-notification-service"
+  pullPolicy: Always
   tag: "latest"
 
 resources:

@@ -29,72 +29,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - /bin/sh
-            - -c
-            - |
-              pip install fastapi uvicorn kubernetes requests
-              exec python -c "
-              import os, time, logging, requests, threading
-              from kubernetes import client, config, watch
-              from fastapi import FastAPI
-              
-              logging.basicConfig(level=logging.INFO)
-              logger = logging.getLogger(__name__)
-              app = FastAPI(title='OneAgent Monitor')
-              
-              class OneAgentMonitor:
-                  def __init__(self):
-                      config.load_incluster_config()
-                      self.v1 = client.CoreV1Api()
-                      self.watch_namespace = os.getenv('WATCH_NAMESPACE', 'dsa-re-dev')
-                      self.dt_api_url = os.getenv('DYNATRACE_METRICS_API_URL')
-                      self.dt_token = os.getenv('DYNATRACE_METRICS_TOKEN')
-                      self.uninstrumented_pods = set()
-              
-                  def send_metric(self, pod_name, namespace, uninstrumented_type):
-                      timestamp = int(time.time() * 1000)
-                      metric_lines = f'ho.re.oneagent.pod.event,pod_name={pod_name},namespace={namespace},event_type=uninstrumented,uninstrumented_type={uninstrumented_type} 1 {timestamp}'
-                      headers = {'Authorization': f'Api-Token {self.dt_token}', 'Content-Type': 'text/plain; charset=utf-8'}
-                      try:
-                          response = requests.post(self.dt_api_url, data=metric_lines, headers=headers, verify=False)
-                          logger.info(f'Event sent for {pod_name}: {response.status_code}')
-                      except Exception as e:
-                          logger.error(f'Failed to send event: {e}')
-              
-                  def check_oneagent_status(self, pod):
-                      if pod.status.phase != 'Running': return None
-                      annotations = pod.metadata.annotations or {}
-                      status = annotations.get('dynatrace.oneagent.status', 'not-attempted')
-                      if status == 'instrumented': return None
-                      elif status == 'failed': return f'failed_{annotations.get(\"dynatrace.oneagent.error\", \"unknown\")}'
-                      elif status == 'attempting': return 'attempting_instrumentation'
-                      else: return 'not_attempted'
-              
-                  def watch_pods(self):
-                      logger.info(f'Starting OneAgent monitor for namespace: {self.watch_namespace}')
-                      w = watch.Watch()
-                      for event in w.stream(self.v1.list_namespaced_pod, namespace=self.watch_namespace):
-                          pod, event_type = event['object'], event['type']
-                          if event_type in ['ADDED', 'MODIFIED']:
-                              status_type = self.check_oneagent_status(pod)
-                              pod_key = f'{pod.metadata.namespace}/{pod.metadata.name}'
-                              if status_type and pod_key not in self.uninstrumented_pods:
-                                  logger.warning(f'Non-instrumented pod: {pod.metadata.name} - {status_type}')
-                                  self.send_metric(pod.metadata.name, pod.metadata.namespace, status_type)
-                                  self.uninstrumented_pods.add(pod_key)
-              
-              @app.get('/health')
-              def health(): return {'status': 'healthy', 'service': 'oneagent-monitor'}
-              
-              @app.on_event('startup')
-              async def startup():
-                  monitor = OneAgentMonitor()
-                  threading.Thread(target=monitor.watch_pods, daemon=True).start()
-                  logger.info('OneAgent Monitor started')
-              
-              import uvicorn
-              uvicorn.run(app, host='0.0.0.0', port=8000)
-              "
+            - python3
+            - /tmp/oneagent_monitor.py
           ports:
             - name: http
               containerPort: 8000
@@ -116,9 +52,24 @@ spec:
             - name: WATCH_NAMESPACE
               value: {{ .Values.environment.watchNamespace | default .Release.Namespace }}
             - name: DYNATRACE_METRICS_TOKEN
-              value: "dt0c01.ST2EY72KQINMH574WMNVI7YN.G3DFPBEJYMODIDAEX454M7YWBUVEFOWKPRVMWFM36SZIRGEIRYMQ"
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-metrics-ingest
+                  key: token
             - name: DYNATRACE_METRICS_API_URL
-              value: "https://activegate-notprod.dsa-notprod.homeoffice.gov.uk/e/ewo35763/api/v2/metrics/ingest"
+              valueFrom:
+                secretKeyRef:
+                  name: registration-service-dynatrace-metrics-ingest
+                  key: api_url
+          volumeMounts:
+            - name: script
+              mountPath: /tmp/oneagent_monitor.py
+              subPath: oneagent_monitor.py
+      volumes:
+        - name: script
+          configMap:
+            name: {{ include "oneagent-monitor-chart.fullname" . }}-script
+            defaultMode: 0755
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

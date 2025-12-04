@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+import os
+import time
+import logging
+import requests
+import threading
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def send_metric_to_dynatrace(metric_line, dt_api_url, dt_token):
+    """Send metric to Dynatrace with fallback URLs"""
+    urls = [
+        dt_api_url,  # Internal ActiveGate
+        "https://ewo35763.live.dynatrace.com/api/v2/metrics/ingest"  # External SaaS
+    ]
+    
+    headers = {
+        "Authorization": f"Api-Token {dt_token}",
+        "Content-Type": "text/plain; charset=utf-8"
+    }
+    
+    for url in urls:
+        try:
+            response = requests.post(url, data=metric_line, headers=headers, verify=False, timeout=10)
+            if response.status_code == 202:
+                logger.info(f"SUCCESS: Metric sent to {url}: {metric_line}")
+                return True
+            else:
+                logger.error(f"FAILED: {response.status_code} from {url}")
+        except Exception as e:
+            logger.error(f"Failed to send to {url}: {e}")
+    
+    return False
+
+def main():
+    namespace = os.getenv("WATCH_NAMESPACE", "dsa-re-dev")
+    dt_api_url = os.getenv("DYNATRACE_METRICS_API_URL")
+    dt_token = os.getenv("DYNATRACE_METRICS_TOKEN")
+    
+    logger.info(f"Starting OneAgent Monitor for namespace: {namespace}")
+    
+    counter = 0
+    while True:
+        counter += 1
+        timestamp = int(time.time() * 1000)
+        
+        # Send all 5 metrics
+        metrics = [
+            f"ho.re.oneagent.pod.uninstrumented-Event,pod_name=external-monitor-test-{counter},namespace={namespace},event_type=uninstrumented,uninstrumented_type=not_attempted 1 {timestamp}",
+            f"ho.re.oneagent.pods.uninstrumented.gauge-count,namespace={namespace} {counter} {timestamp}",
+            f"ho.re.oneagent.monitor.heartbeat,namespace={namespace} 1 {timestamp}",
+            f"ho.re.oneagent.monitor.api_failure,namespace={namespace} 1 {timestamp}",
+            f"ho.re.oneagent.monitor.stream_stale,namespace={namespace} 1 {timestamp}"
+        ]
+        
+        logger.info(f"Sending cycle {counter} metrics...")
+        for metric in metrics:
+            success = send_metric_to_dynatrace(metric, dt_api_url, dt_token)
+            if success:
+                metric_name = metric.split(',')[0]
+                logger.info(f"✅ {metric_name}")
+            time.sleep(2)  # Small delay between metrics
+        
+        logger.info(f"Cycle {counter} completed. Waiting 2 minutes...")
+        time.sleep(120)  # Wait 2 minutes
+
+if __name__ == "__main__":
+    main()

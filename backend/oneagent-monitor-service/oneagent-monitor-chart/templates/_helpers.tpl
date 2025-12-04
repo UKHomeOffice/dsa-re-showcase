@@ -8,6 +8,18 @@ Expand the name of the chart.
 {{/*
 Create a default fully qualified app name.
 */}}
+{{- define "oneagent-monitor.fullname" -}}
+{{- include "oneagent-monitor-chart.fullname" . -}}
+{{- end }}
+
+{{- define "oneagent-monitor.labels" -}}
+{{- include "oneagent-monitor-chart.labels" . -}}
+{{- end }}
+
+{{- define "oneagent-monitor.selectorLabels" -}}
+{{- include "oneagent-monitor-chart.selectorLabels" . -}}
+{{- end }}
+
 {{- define "oneagent-monitor-chart.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
