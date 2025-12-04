@@ -13,10 +13,25 @@ data:
     import requests
     import threading
     import subprocess
-    import json
+    import sys
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
+
+    # Install kubernetes client if not available
+    def install_kubernetes_client():
+        try:
+            import kubernetes
+            return True
+        except ImportError:
+            logger.info("Installing kubernetes client...")
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "kubernetes"])
+                import kubernetes
+                return True
+            except Exception as e:
+                logger.error(f"Failed to install kubernetes client: {e}")
+                return False
 
     class OneAgentMonitor:
         def __init__(self):
@@ -25,6 +40,17 @@ data:
             self.dt_token = os.getenv("DYNATRACE_METRICS_TOKEN")
             self.uninstrumented_pods = set()
             self.last_api_success = time.time()
+            self.v1 = None
+            
+            # Initialize Kubernetes client
+            if install_kubernetes_client():
+                try:
+                    from kubernetes import client, config
+                    config.load_incluster_config()
+                    self.v1 = client.CoreV1Api()
+                    logger.info("Kubernetes client initialized successfully")
+                except Exception as e:
+                    logger.error(f"Failed to initialize Kubernetes client: {e}")
             
         def send_metric_to_dynatrace(self, metric_line):
             """Send metric to Dynatrace with fallback URLs"""
@@ -48,26 +74,22 @@ data:
                     logger.error(f"Failed to send to {url}: {e}")
             return False
 
-        def get_pods_via_kubectl(self):
-            """Get pods using kubectl since kubernetes client isn't available"""
+        def get_pods_via_api(self):
+            """Get pods using Kubernetes Python client"""
+            if not self.v1:
+                return None
+                
             try:
-                result = subprocess.run(
-                    ["kubectl", "get", "pods", "-n", self.namespace, "-o", "json"],
-                    capture_output=True, text=True, timeout=30
-                )
-                if result.returncode == 0:
-                    self.last_api_success = time.time()
-                    return json.loads(result.stdout)
-                else:
-                    logger.error(f"kubectl failed: {result.stderr}")
-                    return None
+                pods = self.v1.list_namespaced_pod(namespace=self.namespace)
+                self.last_api_success = time.time()
+                return pods
             except Exception as e:
-                logger.error(f"Failed to get pods: {e}")
+                logger.error(f"Failed to get pods via API: {e}")
                 return None
 
         def check_oneagent_status(self, pod):
             """Check OneAgent status using pod annotations"""
-            annotations = pod.get("metadata", {}).get("annotations", {})
+            annotations = pod.metadata.annotations or {}
             status = annotations.get("dynatrace.com/oneagent-status", "not-attempted")
             
             if status == "instrumented":
@@ -99,9 +121,9 @@ data:
             while True:
                 try:
                     # Get current pods
-                    pods_data = self.get_pods_via_kubectl()
+                    pods_response = self.get_pods_via_api()
                     
-                    if pods_data is None:
+                    if pods_response is None:
                         # API failure - send alert
                         timestamp = int(time.time() * 1000)
                         metric = f"ho.re.oneagent.monitor.api_failure,namespace={self.namespace} 1 {timestamp}"
@@ -118,11 +140,11 @@ data:
                     current_uninstrumented = set()
                     
                     # Check each pod
-                    for pod in pods_data.get("items", []):
-                        if pod.get("status", {}).get("phase") != "Running":
+                    for pod in pods_response.items:
+                        if pod.status.phase != "Running":
                             continue
                             
-                        pod_name = pod.get("metadata", {}).get("name")
+                        pod_name = pod.metadata.name
                         status_type = self.check_oneagent_status(pod)
                         
                         if status_type:
@@ -134,7 +156,7 @@ data:
                                 timestamp = int(time.time() * 1000)
                                 metric = f"ho.re.oneagent.pod.uninstrumented-Event,pod_name={pod_name},namespace={self.namespace},event_type=uninstrumented,uninstrumented_type={status_type} 1 {timestamp}"
                                 self.send_metric_to_dynatrace(metric)
-                                logger.warning(f"Uninstrumented pod detected: {pod_name} - {status_type}")
+                                logger.warning(f"NEW UNINSTRUMENTED POD DETECTED: {pod_name} - {status_type}")
                     
                     # Update uninstrumented pods set
                     self.uninstrumented_pods = current_uninstrumented
@@ -145,7 +167,7 @@ data:
                     metric = f"ho.re.oneagent.pods.uninstrumented.gauge-count,namespace={self.namespace} {count} {timestamp}"
                     self.send_metric_to_dynatrace(metric)
                     
-                    logger.info(f"Monitoring cycle completed. Found {count} uninstrumented pods.")
+                    logger.info(f"Monitoring cycle completed. Found {count} uninstrumented pods: {[p.split('/')[1] for p in self.uninstrumented_pods]}")
                     
                 except Exception as e:
                     logger.error(f"Error in monitoring loop: {e}")

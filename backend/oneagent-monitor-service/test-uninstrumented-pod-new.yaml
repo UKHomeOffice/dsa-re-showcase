@@ -16,7 +16,8 @@ spec:
         dynatrace.com/oneagent-status: "not-attempted"
     spec:
       containers:
-      - name: nginx
+      - name: test-app
         image: quay.io/ukhomeofficedigital/alpine:v3.15
+        command: ["sleep", "3600"]
         ports:
         - containerPort: 80
