@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:alpine
+        image: quay.io/ukhomeofficedigital/alpine:v3.15
         ports:
         - containerPort: 80
