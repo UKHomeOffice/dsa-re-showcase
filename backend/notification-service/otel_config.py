@@ -24,3 +24,6 @@ metrics.set_meter_provider(meter_provider)
 
 # Get a reusable meter instance
 meter = metrics.get_meter("notification-service")
+
+# Matched by the DSA management zone's dimensional rule in Dynatrace.
+METRIC_ATTRIBUTES = {"k8s.namespace.name": os.getenv("K8S_NAMESPACE", "unknown")}

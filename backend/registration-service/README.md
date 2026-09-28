@@ -108,6 +108,10 @@ Remember that by deploying changes from locally branches you are potentially div
   }
   ```
 
+## Kafka keystore values
+
+You can get these values by running the below command:
+kubectl --context=acp-notprod_DSA -n dsa-re-dev get secret   registration-service-kafka-keystore -o jsonpath='{.data}' | jq 'values'
 
 
 ## Contributing

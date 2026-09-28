@@ -1,6 +1,6 @@
 import psycopg2
 import os
-from otel_config import meter
+from otel_config import meter, METRIC_ATTRIBUTES
 from opentelemetry.metrics import Observation
 
 
@@ -79,7 +79,7 @@ def increment_login_count():
         conn.close()
 
         # Increment the OpenTelemetry UpDownCounter
-        db_login_event_counter.add(1, {"db.table": "login_counts", "operation": "increment"})
+        db_login_event_counter.add(1, {"db.table": "login_counts", "operation": "increment", **METRIC_ATTRIBUTES})
         print("Successfully incremented total_count in the database.")
     except Exception as e:
         print(f"Error incrementing total_count in the database: {e}")
@@ -98,7 +98,7 @@ def get_login_total_count(options):
         if result:
             total_count = result[0]
             print(f"[METRIC] Reporting total_count = {total_count}")
-            yield Observation(value=total_count, attributes={"db.table": "login_counts"})
+            yield Observation(value=total_count, attributes={"db.table": "login_counts", **METRIC_ATTRIBUTES})
         else:
             print("No total_count found in the database.")
     except Exception as e:

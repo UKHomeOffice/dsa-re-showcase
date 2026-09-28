@@ -62,7 +62,10 @@ spec:
             - name: TRUSTSTORE_RUNTIME
               value: /certs
             - name: TRUSTSTORE_PASSWORD
-              value: changeit    
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jvmTruststore.passwordSecret.name | quote }}
+                  key: {{ .Values.jvmTruststore.passwordSecret.key | quote }}
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -71,7 +74,7 @@ spec:
               cpu: 100m
               memory: 512Mi
           command: ["/bin/sh"]
-          args: ["-c", "keytool -importkeystore -srckeystore $JAVA_HOME/lib/security/cacerts -destkeystore /certs/custom_truststore.jks -srcstoretype JKS -deststoretype JKS -storepass changeit -noprompt && keytool -import -alias ACPRootCA -keystore /certs/custom_truststore.jks -file /etc/ssl/certs/acp-root.crt -storepass changeit -noprompt"]
+          args: ["-c", "keytool -importkeystore -srckeystore $JAVA_HOME/lib/security/cacerts -destkeystore /certs/custom_truststore.jks -srcstoretype JKS -deststoretype JKS -storepass:env TRUSTSTORE_PASSWORD -noprompt && keytool -import -alias ACPRootCA -keystore /certs/custom_truststore.jks -file /etc/ssl/certs/acp-root.crt -storepass:env TRUSTSTORE_PASSWORD -noprompt"]
           volumeMounts:
             - name: bundle
               mountPath: /etc/ssl/certs
@@ -143,14 +146,38 @@ spec:
                 secretKeyRef:
                   name: registration-service-dynatrace-metrics-ingest
                   key: api_url
+            # Must precede JAVA_OPTS so Kubernetes can expand $(TRUSTSTORE_PASSWORD).
+            - name: TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jvmTruststore.passwordSecret.name | quote }}
+                  key: {{ .Values.jvmTruststore.passwordSecret.key | quote }}
             - name: JAVA_OPTS
               value: >
                 -Xms256m -Xmx400m
                 -Dspring.profiles.active={{ .Release.Namespace }}
                 -Djavax.net.ssl.trustStore=/certs/custom_truststore.jks
-                -Djavax.net.ssl.trustStorePassword=changeit
+                -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)
             - name: KAFKA_CONFIG
               value: "/etc/kafka-tls/client.properties"
+          {{- with .Values.kafka.keystore }}
+            - name: SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_LOCATION
+              value: {{ .location | quote }}
+            - name: SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .passwordSecret.name | quote }}
+                  key: {{ .passwordSecret.key | quote }}
+            - name: SPRING_KAFKA_PROPERTIES_SSL_KEYSTORE_TYPE
+              value: {{ .type | quote }}
+          {{- end }}
+          {{- with (.Values.kafka.truststore).passwordSecret }}
+            - name: SPRING_KAFKA_PROPERTIES_SSL_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | quote }}
+                  key: {{ .key | quote }}
+          {{- end }}
           {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
             - name: LD_PRELOAD
               value: /opt/dynatrace/oneagent/agent/lib64/liboneagentproc.so

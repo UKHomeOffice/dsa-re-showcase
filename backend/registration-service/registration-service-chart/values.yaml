@@ -59,6 +59,12 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
+kafka: {}
+
+jvmTruststore:
+  passwordSecret:
+    name: "registration-service-kafka-keystore"
+    key: "truststore-password"
 
 nodeSelector: {}
 
