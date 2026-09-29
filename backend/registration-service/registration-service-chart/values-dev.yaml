@@ -25,4 +25,16 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+kafka:
+  keystore:
+    location: "/etc/kafka-tls/kafka-client.2026-09-24/app-msk-kafka-client.p12"
+    passwordSecret:
+      name: "registration-service-kafka-keystore"
+      key: "password"
+    type: "PKCS12"
+  truststore:
+    passwordSecret:
+      name: "registration-service-kafka-keystore"
+      key: "truststore-password"
+
 

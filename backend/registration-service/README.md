@@ -109,7 +109,6 @@ Remember that by deploying changes from locally branches you are potentially div
   ```
 
 
-
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
