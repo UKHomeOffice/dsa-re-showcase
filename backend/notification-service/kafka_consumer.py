@@ -1,12 +1,14 @@
 import json
 import logging
 import asyncio
+from contextlib import nullcontext
 from datetime import datetime
 from kafka import KafkaConsumer
 from ssl import create_default_context
 from db import increment_login_count
 from custom_metric import login_event_counter
 from otel_config import METRIC_ATTRIBUTES
+from opensearch_sink import index_login_event
 import os
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
         group_id=group_id,
         security_protocol='SSL',
         ssl_context=ssl_context,
+        enable_auto_commit=False,
         session_timeout_ms=60000,
         heartbeat_interval_ms=20000
       )
@@ -50,18 +53,21 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
         try:
             raw = message.value.decode('utf-8').strip()
             logging.info(f"Raw login message: {raw}")
-            
-            if not sdk:
-              logging.warning("Dynatrace SDK not initialized. Skipping tracing for this message.")
-            
-            if sdk:
-              with sdk.trace_custom_service('Process Kafka Login Message', 'notification-service'):
-                sdk.add_custom_request_attribute('kafka.topic', message.topic)
-                sdk.add_custom_request_attribute('kafka.partition', message.partition  )
-                sdk.add_custom_request_attribute('kafka.offset', message.offset)
-                sdk.add_custom_request_attribute('kafka.key', str(message.key))
 
-                # Formatting and processing the message:
+            trace_context = (
+                sdk.trace_custom_service('Process Kafka Login Message', 'notification-service')
+                if sdk else nullcontext()
+            )
+            if not sdk:
+                logging.warning("Dynatrace SDK not initialized. Processing without custom tracing.")
+
+            with trace_context:
+                if sdk:
+                    sdk.add_custom_request_attribute('kafka.topic', message.topic)
+                    sdk.add_custom_request_attribute('kafka.partition', message.partition)
+                    sdk.add_custom_request_attribute('kafka.offset', message.offset)
+                    sdk.add_custom_request_attribute('kafka.key', str(message.key))
+
                 parts = raw.split(", ")
                 if len(parts) == 3 and "User logged in: " in parts[0]:
                     name = parts[0].split("User logged in: ")[1].strip()
@@ -71,27 +77,43 @@ async def start_consumer(bootstrap_servers, topic, group_id, recent_logins, max_
                     logging.info(f"Login detected: {name} ({email}) at {timestamp}")
                     logging.info(f"Notification sent to {email}")
 
-                    # Add the login event to recent_logins
                     login_event = {
+                        "event_type": "login",
                         "name": name,
                         "email": email,
-                        "timestamp": timestamp
+                        "timestamp": timestamp,
+                        "kafka": {
+                            "topic": message.topic,
+                            "partition": message.partition,
+                            "offset": message.offset,
+                        },
                     }
+                    opensearch_document = {
+                        "event_type": "login",
+                        "timestamp": timestamp,
+                        "kafka": login_event["kafka"],
+                    }
+                    index_login_event(
+                        opensearch_document, message.topic, message.partition, message.offset
+                    )
+
                     recent_logins.insert(0, login_event)
                     if len(recent_logins) > max_logins:
                         recent_logins = recent_logins[:max_logins]
 
-                    # Increment the counter metric
                     login_event_counter.add(1, {"event_type": "login", **METRIC_ATTRIBUTES})
                     logging.info("Custom metric 'login_event_counter' incremented by 1.")
-
-                    # Increment the total_count in the database
                     increment_login_count()
                 else:
                     logging.warning("Unexpected message format. Skipping.")
 
+            consumer.commit()
+
         except Exception as e:
-            logging.error(f"Error processing message: {e}")
+                        logging.error(f"Error processing message; it will be retried: {e}")
+                        consumer.close()
+                        await asyncio.sleep(5)
+                        break
     except Exception as e:
       logger.error(f"Kafka connection error: {e}")
       await asyncio.sleep(5)  

@@ -36,3 +36,6 @@ kafka:
 postgres:
   host: "notification-service-db.dsa-re-dev.svc.cluster.local"
 
+opensearch:
+  enabled: true
+

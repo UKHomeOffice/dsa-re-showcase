@@ -69,3 +69,9 @@ affinity: {}
 
 dynatrace:
   networkZone: "default"
+
+opensearch:
+  enabled: false
+  secretName: dsa-re-showcase-service-opensearch
+  region: eu-west-2
+  index: dsa-re-notprod-showcase-es
