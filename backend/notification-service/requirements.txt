@@ -10,3 +10,4 @@ psycopg2-binary
 requests
 opensearch-py>=2.6,<3
 boto3
+certifi

@@ -3,6 +3,7 @@ import os
 from urllib.parse import urlsplit
 
 import boto3
+import certifi
 from opensearchpy import AWSV4SignerAuth, OpenSearch, RequestsHttpConnection
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ def _get_client():
         http_auth=auth,
         use_ssl=True,
         verify_certs=True,
+        ca_certs=certifi.where(),
         connection_class=RequestsHttpConnection,
         timeout=10,
         max_retries=3,

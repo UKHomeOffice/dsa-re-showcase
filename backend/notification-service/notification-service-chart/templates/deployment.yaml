@@ -49,7 +49,7 @@ spec:
                   name: notification-service-dynatrace-oneagent
                   key: paas-installer-download-token
             - name: DYNATRACE_ONEAGENT_OPTIONS
-              value: flavor=multidistro&include=python&include=sdk
+              value: flavor=multidistro
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
             - name: DYNATRACE_ONEAGENT_VERSION
