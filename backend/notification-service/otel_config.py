@@ -5,12 +5,10 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 
-# Set the CA certificate path via an environment variable
-os.environ["REQUESTS_CA_BUNDLE"] = "/app/acp_root_ca.crt"
-
 # Initialize OpenTelemetry Metric Exporter
 metric_exporter = OTLPMetricExporter(
     endpoint="https://dynatrace-activegate-notprod.dynatrace.svc.cluster.local/e/ewo35763/api/v2/otlp/v1/metrics",
+    certificate_file="/app/acp_root_ca.crt",
     headers={
         "Authorization": f"Api-Token {os.getenv('DYNATRACE_PAAS_TOKEN')}",
         "Content-Type": "application/x-protobuf"

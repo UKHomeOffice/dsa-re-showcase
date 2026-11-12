@@ -118,6 +118,15 @@ Each microservice resides in its own subdirectory within the monorepo.
 - The notification-service otel_config.py provide the set up module for OTLP and the db.py that include the database connection, counters and logic.
 ---
 
+## OpenSearch Event Indexing
+
+- The notification service can optionally index login-event JSON documents into an Amazon OpenSearch Service domain. The notprod chart enables this integration; other chart values keep it disabled by default.
+- The service signs OpenSearch requests with AWS SigV4 using the writer credentials and endpoint from the `dsa-re-showcase-service-opensearch` Kubernetes Secret. The read-only credentials are not mounted into the service.
+- Indexed documents contain the event type, timestamp, and Kafka topic/partition/offset, but omit login names and email addresses. Offset-derived document IDs make retries idempotent, and Kafka offsets are committed after processing succeeds.
+- OneAgent traces the service-side consume/index operation. OpenSearch domain metrics require the separate Dynatrace AWS/CloudWatch integration; indexing documents does not itself forward OpenSearch telemetry to Dynatrace.
+
+---
+
 ## Setup
 
 ### Clone the Monorepo

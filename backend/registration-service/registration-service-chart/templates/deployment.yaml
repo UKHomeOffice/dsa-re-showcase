@@ -36,13 +36,15 @@ spec:
       initContainers:
       {{- if((.Values.dynatrace).podRuntimeInjection).enabled }}
         - name: install-oneagent
-          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:1.3.4
+          image: quay.io/ukhomeofficedigital/dsa-re-dynatrace-oneagent-pod-runtime-injection:2.1.2
           env:
             - name: DYNATRACE_API_URL
               valueFrom:
                 secretKeyRef:
                   name: registration-service-dynatrace-oneagent
                   key: api-url
+            - name: DYNATRACE_CA_BUNDLE
+              value: /app/acp_root_ca.crt
             - name: DYNATRACE_PAAS_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -52,6 +54,8 @@ spec:
               value: flavor=multidistro&include=java
             - name: DYNATRACE_INSTALL_DIR
               value: /opt/dynatrace/oneagent
+            - name: DYNATRACE_ONEAGENT_VERSION
+              value: 1.345.93.20261023-231338
           volumeMounts:
             - mountPath: /opt/dynatrace/oneagent
               name: {{ (((.Values).dynatrace).podRuntimeInjection).volumeName | default "oneagent" }}
